@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+node_modules/
+
+# Local secrets and machine-specific GEE configuration.
+config/gee.local.json
+.hermes/plugins/skillevo-gee/project-root.txt
+
+# Runtime artifacts.
+runs/
+

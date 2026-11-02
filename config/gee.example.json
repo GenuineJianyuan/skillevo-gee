@@ -1,0 +1,6 @@
+{
+  "ee_project": "your-earth-engine-project",
+  "node_executable": "node",
+  "node_service_account_key_path": "D:/path/to/service-account.json",
+  "proxy_url": "http://127.0.0.1:7890"
+}

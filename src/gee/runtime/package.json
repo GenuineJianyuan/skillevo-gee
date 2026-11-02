@@ -1,0 +1,14 @@
+{
+  "name": "skillevo-gee-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Headless Google Earth Engine runtime used by the SkillEvo-GEE execution tool",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/earthengine": "1.7.31",
+    "https-proxy-agent": "9.1.0"
+  }
+}
