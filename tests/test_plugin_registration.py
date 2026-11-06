@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -31,7 +32,21 @@ class PluginRegistrationTests(unittest.TestCase):
             ["skillevo_catalog", "skillevo_workflow_init", "skillevo_gee_execute"],
         )
         result = context.tools[0]["handler"]({"operation": "validate"})
-        self.assertIn('"asset_count": 23', result)
+        self.assertIn('"asset_count": 27', result)
+
+        workflow_tool = context.tools[1]
+        init_result = workflow_tool["handler"]({
+            "operation": "init",
+            "objective": "Map seasonal water area",
+        })
+        self.assertIn('"stage": "requirement"', init_result)
+        request_id = json.loads(init_result)["state"]["request"]["request_id"]
+        defer_result = workflow_tool["handler"]({
+            "operation": "defer",
+            "request_id": request_id,
+            "reason": "Only part of the objective matches published capabilities",
+        })
+        self.assertIn('"stage": "pending_autonomous_planning"', defer_result)
 
 
 if __name__ == "__main__":

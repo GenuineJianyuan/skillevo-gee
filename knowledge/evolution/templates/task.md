@@ -14,7 +14,8 @@ source: Replace with source identity
 ## Applicability and boundaries
 ## Inputs
 ## Outputs
-## Workflow
+## Required workflow
+## Optional workflow
 ## Data dependencies
 ## Acceptance criteria
 ## User confirmations

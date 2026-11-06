@@ -70,11 +70,19 @@ def register(ctx) -> None:
         return _run(ctx, command, timeout=30)
 
     def workflow_handler(args: dict, **_: Any) -> str:
-        command = ["workflow", "init", "--objective", str(args["objective"])]
-        if args.get("region"):
-            command += ["--region", str(args["region"])]
-        if args.get("time_range"):
-            command += ["--time-range", str(args["time_range"])]
+        operation = str(args.get("operation", "init"))
+        if operation == "defer":
+            command = [
+                "workflow", "defer",
+                "--request-id", str(args["request_id"]),
+                "--reason", str(args["reason"]),
+            ]
+        else:
+            command = ["workflow", "init", "--objective", str(args["objective"])]
+            if args.get("region"):
+                command += ["--region", str(args["region"])]
+            if args.get("time_range"):
+                command += ["--time-range", str(args["time_range"])]
         return _run(ctx, command, timeout=30)
 
     def gee_handler(args: dict, **_: Any) -> str:
@@ -99,10 +107,12 @@ def register(ctx) -> None:
     }
     workflow_schema = {
         "name": "skillevo_workflow_init",
-        "description": "Create a traceable initial SkillEvo-GEE request state.",
+        "description": "Initialize a request or defer an uncovered request to autonomous-planning pending.",
         "parameters": {"type": "object", "properties": {
+            "operation": {"type": "string", "enum": ["init", "defer"]},
             "objective": {"type": "string"}, "region": {"type": "string"},
-            "time_range": {"type": "string"}}, "required": ["objective"]},
+            "time_range": {"type": "string"}, "request_id": {"type": "string"},
+            "reason": {"type": "string"}}, "required": ["operation"]},
     }
     gee_schema = {
         "name": "skillevo_gee_execute",

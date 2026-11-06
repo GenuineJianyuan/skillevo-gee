@@ -8,17 +8,22 @@ summary: 生成土壤湿度时间均值图，并对每期影像执行区域统�
 tags: [soil-moisture, spatial-summary, time-series]
 references: []
 source: raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md
+operation: required
 ---
 
-# 简述
+# Purpose
 
 从预处理集合生成空间概览与区域统计序列。
 
-## 算法描述
+## Operation classification
+
+`required`。该操作是其所属 Task 核心分析链的一部分。
+
+## Procedure
 
 用集合时间均值生成地图层；逐期以适配的 reducer 和尺度对研究区归约，保留日期、统计值和有效像元信息。
 
-## 软约束
+## Constraints
 
 - 调色板最小/最大值必须来源于数据分布或产品范围。
 - 区域均值可能掩盖空间异质性，应同时记录有效面积或分区结果。
@@ -26,12 +31,13 @@ source: raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md
 
 ## Example
 
-### 土壤湿度空间均值与区域序列
+### Scenario
 
-- Source: `raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md`
-- Status: `experimental`
+土壤湿度空间均值与区域序列
 
-# 代码骨架
+Source: `raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md`
+
+### Implementation
 
 ```javascript
 var meanImage = soil.mean();
@@ -43,6 +49,10 @@ var rows = soil.map(function(image) {
 });
 ```
 
-# 限制
+### Validation
+
+Status: `required` operation; knowledge status follows frontmatter and requires Task-level execution evidence.
+
+### Limitations
 
 地图可视化范围需要从统计量确定；跨多个国家或不连续几何的均值必须解释其空间含义。

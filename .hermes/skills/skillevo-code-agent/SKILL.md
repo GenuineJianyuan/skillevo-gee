@@ -10,6 +10,8 @@ Generate code from the approved plan, not directly from the user request.
 Requirements:
 
 - map each plan step to visible code sections;
+- preserve the plan's required-step order and generate optional sections only
+  when the approved plan contains them with an inclusion reason;
 - use only checked dataset IDs, bands, scale factors, and parameters;
 - preserve unknown inputs as named placeholders;
 - add checks for collection size, bands, and key intermediate values;

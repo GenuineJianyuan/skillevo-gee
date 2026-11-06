@@ -19,6 +19,8 @@ class HermesRunnerTests(unittest.TestCase):
         command = args[0]
         self.assertEqual(command[:2], ["hermes", "chat"])
         self.assertIn("skillevo-supervisor", command)
+        self.assertIn("Only matched requests", command[-1])
+        self.assertIn("pending autonomous planning", command[-1])
         self.assertEqual(kwargs["env"]["NO_PROXY"], "*")
         self.assertEqual(kwargs["env"]["SKILLEVO_GEE_ROOT"], str(ROOT))
 

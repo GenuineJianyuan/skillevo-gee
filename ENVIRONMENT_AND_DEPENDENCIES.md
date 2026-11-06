@@ -1,6 +1,6 @@
 # SkillEvo-GEE 环境、Hermes 版本与依赖说明
 
-> 基线日期：2026-11-02（Asia/Shanghai）
+> 基线日期：2026-11-06（Asia/Shanghai）
 >
 > 本文记录当前已验证环境、运行模式、安装顺序和已知依赖风险。密钥、服务账号正文和其他凭据不得写入本文或提交到版本库。
 
@@ -132,7 +132,7 @@ python skillevo.py gee execute --script runs/<request_id>/generated.js
 当前外部 Skill 目录为：
 
 ```text
-D:/Project/Paper_Projects/GEE Agent/skillevo/.hermes/skills
+D:/Project/Paper_Projects/GEE Agent/skillevo-gee/.hermes/skills
 ```
 
 当前 Gateway 不是 Windows 登录自启动服务。机器重启后，一键运行前需要先执行：
@@ -210,7 +210,7 @@ C60AD534EB54345FCF8CE8527C2AE79BD7655459BDC88B2E1424921339E6A900
 skills:
   write_approval: true
   external_dirs:
-    - D:/Project/Paper_Projects/GEE Agent/skillevo/.hermes/skills
+    - D:/Project/Paper_Projects/GEE Agent/skillevo-gee/.hermes/skills
 ```
 
 `write_approval=true` 表示 Hermes 对 Skill 写入执行审批保护。它不等价于领域知识发布审批；`knowledge/published` 仍需项目自己的 candidate/review/publish 流程。
@@ -303,7 +303,7 @@ Hermes Agent v0.22.5
 ### 6.2 创建 Python 虚拟环境
 
 ```powershell
-cd "D:\Project\Paper_Projects\GEE Agent\skillevo"
+cd "D:\Project\Paper_Projects\GEE Agent\skillevo-gee"
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -326,7 +326,7 @@ skillevo-gee catalog validate
 ### 6.3 安装 Node 依赖
 
 ```powershell
-cd "D:\Project\Paper_Projects\GEE Agent\skillevo\src\gee\runtime"
+cd "D:\Project\Paper_Projects\GEE Agent\skillevo-gee\src\gee\runtime"
 npm ci --omit=dev
 cd ..\..\..
 ```
@@ -354,7 +354,7 @@ Copy-Item config\gee.example.json config\gee.local.json
 
 ```powershell
 hermes config set skills.write_approval true
-hermes config set skills.external_dirs "D:/Project/Paper_Projects/GEE Agent/skillevo/.hermes/skills"
+hermes config set skills.external_dirs "D:/Project/Paper_Projects/GEE Agent/skillevo-gee/.hermes/skills"
 ```
 
 然后检查：
@@ -369,7 +369,7 @@ hermes config get skills.external_dirs
 当前插件是 workspace-owned 手工插件，不在 Hermes 公共插件目录中。PowerShell 示例：
 
 ```powershell
-$projectRoot = "D:\Project\Paper_Projects\GEE Agent\skillevo"
+$projectRoot = "D:\Project\Paper_Projects\GEE Agent\skillevo-gee"
 $pluginSource = Join-Path $projectRoot ".hermes\plugins\skillevo-gee"
 $pluginTarget = Join-Path $env:LOCALAPPDATA "hermes\plugins\skillevo-gee"
 
@@ -422,8 +422,8 @@ python skillevo.py gee execute --script runs/<request_id>/generated.js
 | `skillevo-gee` 插件 | enabled |
 | Plugin Doctor | 通过，3 个工具注册成功 |
 | Gateway | 运行中 |
-| Python 知识目录校验 | `ok=true`，23 个资产 |
-| Python 自动测试 | 8/8 通过 |
+| Python 知识目录校验 | `ok=true`，27 个资产 |
+| Python 自动测试 | 10/10 通过 |
 | Node 直接依赖 | 安装完整 |
 | GEE 云端冒烟 | 3 成功、0 失败 |
 
@@ -501,7 +501,7 @@ Hermes 是外部应用，不在 `pyproject.toml` 中。因此 Python lockfile �
 每次开始工作前建议运行：
 
 ```powershell
-cd "D:\Project\Paper_Projects\GEE Agent\skillevo"
+cd "D:\Project\Paper_Projects\GEE Agent\skillevo-gee"
 hermes --version
 hermes gateway ensure
 python skillevo.py catalog validate

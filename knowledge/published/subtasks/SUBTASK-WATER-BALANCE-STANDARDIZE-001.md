@@ -8,17 +8,22 @@ summary: 对水量平衡序列进行标准化，筛选目标时段并准备地�
 tags: [drought-index, standardization, export]
 references: []
 source: raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md
+operation: required
 ---
 
-# 简述
+# Purpose
 
 将水量平衡序列转换为可比较指标，并生成指定月份的汇总结果。
 
-## 算法描述
+## Operation classification
+
+`required`。该操作是其所属 Task 核心分析链的一部分。
+
+## Procedure
 
 实验例采用 `(x-mean)/stdDev`。严格 SPEI 需要积累尺度、概率分布拟合和标准正态变换，应作为不同实现明确标注。
 
-## 软约束
+## Constraints
 
 - 标准差为零或样本过短时必须终止或标记无效。
 - 不能把简化 z-score 标为严格 SPEI 验证结果。
@@ -26,12 +31,13 @@ source: raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md
 
 ## Example
 
-### 水量平衡 z-score 演示
+### Scenario
 
-- Source: `raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md`
-- Status: `experimental`
+水量平衡 z-score 演示
 
-# 代码骨架
+Source: `raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md`
+
+### Implementation
 
 ```javascript
 var mean = waterBalance.mean();
@@ -43,6 +49,10 @@ var standardized = waterBalance.map(function(image) {
 });
 ```
 
-# 限制
+### Validation
+
+Status: `required` operation; knowledge status follows frontmatter and requires Task-level execution evidence.
+
+### Limitations
 
 这是 z-score，不应命名为严格 SPEI。短序列和零标准差像元需要显式处理。

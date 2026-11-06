@@ -28,8 +28,12 @@ class HermesRunner:
         prompt = (
             "Use the SkillEvo-GEE workflow to complete this geospatial analysis request. "
             "Start by normalizing and persisting the requirement, check published capability "
-            "coverage, follow Task links to Subtasks, use only Examples embedded in those "
-            "Subtasks, verify data, create a plan before code, execute supported GEE code, "
+            "coverage using only capabilities.md, and classify it as matched, partial, or "
+            "unmatched. Only matched requests may follow Task links to Subtasks. Defer partial "
+            "or unmatched requests to pending autonomous planning without using current Task, "
+            "Subtask, or Example knowledge. For matched requests, use only Examples embedded in "
+            "selected Subtasks, include all required operations and only justified optional "
+            "operations, verify data, create a plan before code, execute supported GEE code, "
             "and audit the result. Keep capability gaps and scientific limitations explicit.\n\n"
             f"User request:\n{request}"
         )

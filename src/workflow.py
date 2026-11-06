@@ -10,7 +10,7 @@ from models import FailureClass, RequirementSpec, WorkflowStage, WorkflowState
 
 _ALLOWED_TRANSITIONS = {
     WorkflowStage.REQUIREMENT: {WorkflowStage.CAPABILITY, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
-    WorkflowStage.CAPABILITY: {WorkflowStage.KNOWLEDGE, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
+    WorkflowStage.CAPABILITY: {WorkflowStage.KNOWLEDGE, WorkflowStage.PENDING_AUTONOMOUS_PLANNING, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
     WorkflowStage.KNOWLEDGE: {WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.FAILED},
     WorkflowStage.DATA: {WorkflowStage.PLANNING, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
     WorkflowStage.PLANNING: {WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
@@ -18,6 +18,7 @@ _ALLOWED_TRANSITIONS = {
     WorkflowStage.EXECUTION: {WorkflowStage.AUDIT, WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.FAILED},
     WorkflowStage.AUDIT: {WorkflowStage.COMPLETED, WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
     WorkflowStage.AWAITING_USER: {WorkflowStage.REQUIREMENT, WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.FAILED},
+    WorkflowStage.PENDING_AUTONOMOUS_PLANNING: set(),
     WorkflowStage.COMPLETED: set(),
     WorkflowStage.FAILED: set(),
 }
@@ -71,6 +72,24 @@ class WorkflowStore:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(state.model_dump_json(indent=2) + "\n", encoding="utf-8")
         return target
+
+    def defer_to_autonomous_planning(
+        self,
+        state: WorkflowState,
+        reason: str,
+    ) -> tuple[WorkflowState, Path]:
+        if state.stage != WorkflowStage.CAPABILITY:
+            raise ValueError("Only a capability-stage request can enter autonomous-planning pending")
+        deferred = state.model_copy(update={
+            "stage": WorkflowStage.PENDING_AUTONOMOUS_PLANNING,
+            "routing_reason": reason,
+            "updated_at": datetime.now(timezone.utc),
+        })
+        self.save(deferred)
+        target = self.runs_dir / "pending" / "autonomous-planning" / f"{state.request.request_id}.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(deferred.model_dump_json(indent=2) + "\n", encoding="utf-8")
+        return deferred, target
 
     def transition(self, state: WorkflowState, target: WorkflowStage) -> WorkflowState:
         if target not in _ALLOWED_TRANSITIONS[state.stage]:

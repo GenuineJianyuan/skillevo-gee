@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class StrictModel(BaseModel):
@@ -26,6 +26,11 @@ class AssetStatus(StrEnum):
     MERGED = "merged"
 
 
+class OperationRequirement(StrEnum):
+    REQUIRED = "required"
+    OPTIONAL = "optional"
+
+
 class KnowledgeMetadata(StrictModel):
     id: str = Field(pattern=r"^[A-Z][A-Z0-9-]+$")
     kind: AssetKind
@@ -37,6 +42,15 @@ class KnowledgeMetadata(StrictModel):
     references: list[str] = Field(default_factory=list)
     source: str | None = None
     verified_at: datetime | None = None
+    operation: OperationRequirement | None = None
+
+    @model_validator(mode="after")
+    def validate_operation_scope(self):
+        if self.kind == AssetKind.SUBTASK and self.operation is None:
+            raise ValueError("subtask metadata requires operation: required|optional")
+        if self.kind != AssetKind.SUBTASK and self.operation is not None:
+            raise ValueError("operation is only valid for subtask assets")
+        return self
 
 
 class KnowledgeAsset(StrictModel):
@@ -99,6 +113,7 @@ class WorkflowStage(StrEnum):
     EXECUTION = "execution"
     AUDIT = "audit"
     AWAITING_USER = "awaiting_user"
+    PENDING_AUTONOMOUS_PLANNING = "pending_autonomous_planning"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -120,6 +135,7 @@ class WorkflowState(StrictModel):
     retry_counts: dict[str, int] = Field(default_factory=dict)
     last_failure_class: FailureClass | None = None
     last_failure: str | None = None
+    routing_reason: str | None = None
     updated_at: datetime
 
 

@@ -2,7 +2,7 @@
 
 > 用途：用于核对当前工程是否准确表达论文思路，并作为下一阶段开发路线。
 >
-> 状态基线：2026-11-02 当前本地工程。本文区分“已经实现”“已有结构但尚未闭环”“论文设想”，避免将规划写成实验事实。
+> 状态基线：2026-11-06 当前本地工程。本文区分“已经实现”“已有结构但尚未闭环”“论文设想”，避免将规划写成实验事实。
 
 ## 1. 当前项目的准确定位
 
@@ -38,21 +38,24 @@ capabilities.md
 
 ### 2.1 Capability
 
-`capabilities.md` 是能力索引，回答：
+`capabilities.md` 是需求进入知识体系前的业务能力分类与路由依据，回答：
 
-- 系统当前覆盖哪些完整分析目标；
-- 对应哪个 Task；
-- 能力处于 `verified` 还是 `experimental`；
-- 已知的不适用情形和验证边界是什么。
+- 系统发布了哪些业务分析能力；
+- 每项能力下有哪些具体 Task 入口及其简要目标；
+- 规范化需求是 `matched`、`partial` 还是 `unmatched`；
+- 当前请求能否继续读取 Task/Subtask 知识。
 
-它不应包含完整算法和大段代码，也不直接承担代码生成。
+它不按 Task 类型或验证状态拆分能力，也不包含完整算法和大段代码。
+只有 `matched` 才进入现有知识体系；`partial/unmatched` 写入待行区，且
+不得借用当前 Task/Subtask 自行补造方案。待行区当前只是队列，自主规划器尚未实现。
 
 ### 2.2 Task
 
 Task 表示一个完整分析目标，定义：
 
 - 输入和输出；
-- 有序工作流；
+- 与原始案例步骤顺序一致的有序工作流；
+- 必要操作与额外操作的明确分区；
 - 工作流各步骤引用的 Subtask；
 - 数据流和前后依赖；
 - 能力边界；
@@ -74,11 +77,13 @@ Subtask 表示可复用的局部方法，包含：
 Example 不再具有独立 ID、目录或引用层级。这样做的优点是减少检索跳转，使 Code Agent 获取一个 Subtask 时同时获得方法、约束和实现参考；代价是同一 Example 难以被多个 Subtask 独立复用和评估。论文中需要明确这是当前设计选择，而不是遗漏。
 
 当前目录校验已强制：每个 Subtask 必须有 Example 章节和内嵌代码。
+同时，每个 Subtask 必须声明 `operation: required|optional` 并采用统一标题结构；
+Task 必须采用统一结构，其 Required/Optional 引用必须与 Subtask 分类一致。
 
 ## 3. 核心目录及职责
 
 ```text
-skillevo/
+skillevo-gee/
 ├── skillevo.py                 # 源码树统一入口
 ├── pyproject.toml              # Python 包和 skillevo-gee 命令入口
 ├── README.md                   # 安装及运行说明
@@ -145,7 +150,7 @@ skillevo/
 | 工具 | 作用 | 成熟度 |
 |---|---|---|
 | `skillevo_catalog` | list/search/get/validate 正式知识 | 已实现 |
-| `skillevo_workflow_init` | 建立请求和初始状态 | 已实现，但仅覆盖初始化 |
+| `skillevo_workflow_init` | 建立请求，或将能力外请求写入自主规划待行区 | 已实现 init/defer；自主规划器未实现 |
 | `skillevo_gee_execute` | 执行可信本地 GEE JS 并返回 JSON | 已实现并真实验证 |
 
 这三个工具已经建立最小可用闭环，但还不足以形成严格、可重复的完整代码生成实验流水线。后续需要增加计划保存、数据检查、代码产物登记、审计判定和状态推进等工具。
@@ -156,8 +161,8 @@ skillevo/
 
 - 1 个 Capability；
 - 7 个 Task；
-- 15 个 Subtask；
-- 5 个 verified 资产，18 个 experimental 资产。
+- 19 个 Subtask；
+- 共 27 个资产，其中 5 个 verified、22 个 experimental。
 
 只有影像重采样链条完成了当前 worker 下的真实端到端验证。其余 6 个 Task 主要来自原始案例拆分，适合作为后续代码生成实验和知识修正样本，不能直接视作已经验证的系统能力。
 
@@ -215,11 +220,17 @@ python skillevo.py run "用户的 GEE 分析需求"
 
 #### 阶段 B：能力覆盖判断
 
-先读 `capabilities.md`，再读可能匹配的 Task。输出 `full / partial / uncovered`。能力不覆盖时应停止或进入独立演化流程，不应让代码模型凭常识绕过知识边界。
+只读 `capabilities.md` 并输出 `matched / partial / unmatched`。只有
+`matched` 才读取可能匹配的 Task；`partial/unmatched` 必须写入
+`runs/pending/autonomous-planning/`，不读取 Task/Subtask，也不让代码模型
+凭常识绕过知识边界。该状态表示“等待未来自主规划”，不表示已完成规划。
 
 #### 阶段 C：最小知识包构建
 
-从 Task 引用沿链接读取 Subtask，再读取其内嵌 Example。只注入当前计划所需的最小资产集合，同时记录 ID、版本、状态和用途。
+从 Task 引用沿链接读取 Subtask，再读取其内嵌 Example。计划必须按顺序包含
+全部 Required Subtask；Optional Subtask 只有在用户输出要求或经验证的执行需要
+触发时才加入，并记录加入理由。只注入当前计划所需的最小资产集合，同时记录
+ID、版本、状态、操作分类和用途。
 
 #### 阶段 D：数据检查
 
@@ -258,9 +269,10 @@ GEE worker 进行真实云端求值。Audit Agent 分开判断：执行正确性
 |---|---|---|
 | Python 一条命令启动 Hermes | 已实现 | 已真实运行 |
 | Hermes 不走代理、GEE 单独走代理 | 已实现 | 已真实验证 |
-| Capability/Task/Subtask 解析与校验 | 已实现 | 23 个资产通过校验 |
+| Capability/Task/Subtask 解析与校验 | 已实现 | 27 个资产通过结构、引用和操作分类校验 |
 | Task 到 Subtask 的稳定引用 | 已实现 | 无缺失或跨层引用 |
-| Subtask 内嵌 Example | 已实现 | 15/15 有章节和代码 |
+| Subtask 内嵌 Example | 已实现 | 19/19 有统一章节和代码 |
+| 能力外请求待行路由 | 已实现 | partial/unmatched 可入队；自主规划器未实现 |
 | GEE 云端执行与结构化结果 | 已实现 | 冒烟链 3 成功、0 失败 |
 | 工作流状态模型与失败分类 | 部分实现 | Python 有模型，插件只暴露 init |
 | 需求产物标准化 | 部分实现 | 模型存在，落盘协议未完全强制 |
@@ -278,7 +290,7 @@ GEE worker 进行真实云端求值。Audit Agent 分开判断：执行正确性
 ### 6.1 已经符合的部分
 
 1. **知识与执行分离**：Markdown 知识、Hermes 推理、Python/Node 执行边界清楚。
-2. **能力边界显式**：Capability 和状态字段能区分 verified/experimental。
+2. **能力边界显式**：Capability 负责业务范围路由，资产状态字段负责区分 verified/experimental。
 3. **方案先于代码**：Skill 和状态机均表达该约束。
 4. **可追踪知识引用**：Task/Subtask 有稳定 ID、版本和 references。
 5. **真实运行审计**：不是只检查代码文本，能够访问 Earth Engine 求值。
@@ -465,7 +477,7 @@ manifest 至少记录：
 
 ### P0：冻结当前基线
 
-- 保留当前 23 个资产及版本；
+- 保留当前 27 个资产及版本；
 - 将重采样链作为 infrastructure baseline；
 - 保存当前测试和真实 GEE 冒烟结果；
 - 修订原始论文大纲中的 Example 层和多 Agent 表述。

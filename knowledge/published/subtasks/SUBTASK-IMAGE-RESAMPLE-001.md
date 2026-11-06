@@ -9,19 +9,24 @@ tags: [gee, resampling, bicubic]
 references: []
 source: reference-demo/script_320013.txt
 verified_at: 2026-11-02T11:30:59+08:00
+operation: required
 ---
 
-# Summary
+# Purpose
 
 Apply `image.resample('bicubic')` when continuous imagery should use bicubic
 interpolation during the next reprojection.
 
-## Algorithm
+## Operation classification
+
+`required`。该操作是其所属 Task 核心分析链的一部分。
+
+## Procedure
 
 Earth Engine defers computation. `resample('bicubic')` changes the interpolation
 method used by the next reprojection rather than eagerly creating a new raster.
 
-## Soft constraints
+## Constraints
 
 - Do not apply bicubic interpolation to categorical labels or integer class maps.
 - Interpret the effect together with the downstream projection and scale.
@@ -29,18 +34,15 @@ method used by the next reprojection rather than eagerly creating a new raster.
 
 ## Example
 
-### Landsat 8 original and bicubic resampling demo
-
-- Source: reference demo `script_320013.txt` (implementation embedded below)
-- Status: `verified`
-
-# Scenario
+### Scenario
 
 The example loads a fixed Landsat 8 Collection 2 image near San Francisco,
 creates a bicubic-resampled variant, and adds diagnostic layers. The worker
 turns layers into bounded regional evaluations.
 
-## Implementation
+Source: reference demo `script_320013.txt` (implementation embedded below).
+
+### Implementation
 
 The implementation is embedded here so the Subtask remains self-contained:
 
@@ -63,7 +65,7 @@ var resampled = landsat.resample('bicubic');
 Map.addLayer(resampled, visParams, 'Resampled image');
 ```
 
-## Validation evidence
+### Validation
 
 - Runtime: Earth Engine JavaScript SDK `1.7.31` through Node.js.
 - Validation date: 2026-11-02.
@@ -71,7 +73,7 @@ Map.addLayer(resampled, visParams, 'Resampled image');
 - Evidence: three successful cloud evaluations recorded during the 2026-11-02
   reference-environment verification.
 
-## Limitations
+### Limitations
 
 This is a runtime and audit-path fixture. It is not a complete scientific Task,
 does not perform export, and does not establish optimal resampling choices.

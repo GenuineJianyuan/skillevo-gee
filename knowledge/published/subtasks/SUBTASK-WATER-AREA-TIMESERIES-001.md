@@ -8,17 +8,22 @@ summary: 将逐期水体掩膜乘以像元面积，并按区域求和得到平�
 tags: [water-area, pixel-area, time-series]
 references: []
 source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md
+operation: required
 ---
 
-# 简述
+# Purpose
 
 从每期水体掩膜计算区域水域总面积，而不是水体面积影像的均值。
 
-## 算法描述
+## Operation classification
+
+`required`。该操作是其所属 Task 核心分析链的一部分。
+
+## Procedure
 
 对指数应用产品适配阈值，生成布尔掩膜，乘 `pixelArea()/1e6` 后用 `sum` 归约到 ROI，并保留时间属性。
 
-## 软约束
+## Constraints
 
 - 指数比例因子和阈值必须与产品定义一致。
 - `mean` 归约不代表总面积；必须使用 `sum` 并明确 km2。
@@ -26,12 +31,13 @@ source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图�
 
 ## Example
 
-### MODIS 水体像元面积求和
+### Scenario
 
-- Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
-- Status: `experimental`
+MODIS 水体像元面积求和
 
-# 代码骨架
+Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
+
+### Implementation
 
 ```javascript
 var rows = ndwiCollection.map(function(image) {
@@ -44,6 +50,10 @@ var rows = ndwiCollection.map(function(image) {
 });
 ```
 
-# 限制
+### Validation
+
+Status: `required` operation; knowledge status follows frontmatter and requires Task-level execution evidence.
+
+### Limitations
 
 原教程的阈值 `>=1` 和 `ui.Chart.image.series(... mean ...)` 不能直接作为总面积算法使用。

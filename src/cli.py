@@ -10,6 +10,7 @@ from gee import GEEExecutor
 from hermes_runner import HermesRunner
 from knowledge import KnowledgeCatalog
 from paths import find_project_root
+from models import WorkflowStage
 from workflow import WorkflowStore, initialize_requirement
 
 
@@ -67,6 +68,9 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--objective", required=True)
     init.add_argument("--region")
     init.add_argument("--time-range")
+    defer = workflow_commands.add_parser("defer")
+    defer.add_argument("--request-id", required=True)
+    defer.add_argument("--reason", required=True)
     return parser
 
 
@@ -111,6 +115,15 @@ def main(argv: list[str] | None = None) -> int:
         requirement = initialize_requirement(args.objective, args.region, args.time_range)
         state, path = WorkflowStore(root / "runs").initialize(requirement)
         _print({"state": state.model_dump(mode="json"), "path": str(path)})
+        return 0
+    if args.command == "workflow" and args.workflow_command == "defer":
+        store = WorkflowStore(root / "runs")
+        state = store.load(args.request_id)
+        if state.stage == WorkflowStage.REQUIREMENT:
+            state = store.transition(state, WorkflowStage.CAPABILITY)
+            store.save(state)
+        state, path = store.defer_to_autonomous_planning(state, args.reason)
+        _print({"state": state.model_dump(mode="json"), "pending_path": str(path)})
         return 0
     return 2
 

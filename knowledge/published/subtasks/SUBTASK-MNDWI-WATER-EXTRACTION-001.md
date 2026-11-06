@@ -8,17 +8,22 @@ summary: 使用绿光与短波红外波段计算 MNDWI，并按阈值生成水�
 tags: [landsat, mndwi, water-mask]
 references: []
 source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md
+operation: required
 ---
 
-# 简述
+# Purpose
 
 对经过云处理的 Landsat 影像计算 MNDWI，并生成研究区水体候选掩膜。
 
-## 算法描述
+## Operation classification
+
+`required`。该操作是其所属 Task 核心分析链的一部分。
+
+## Procedure
 
 计算 `(green - swir1) / (green + swir1)`，根据经过验证的阈值分类，并保留指数和水体掩膜。
 
-## 软约束
+## Constraints
 
 - 先完成云、阴影和无效像元掩膜；中值合成会改变时序含义。
 - 阈值受浑浊度、建筑和阴影影响，需要区域验证。
@@ -26,12 +31,13 @@ source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图�
 
 ## Example
 
-### Landsat 8 MNDWI 水体掩膜
+### Scenario
 
-- Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
-- Status: `experimental`
+Landsat 8 MNDWI 水体掩膜
 
-# 代码骨架
+Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
+
+### Implementation
 
 ```javascript
 function addWaterMask(image) {
@@ -40,6 +46,10 @@ function addWaterMask(image) {
 }
 ```
 
-# 限制
+### Validation
+
+Status: `required` operation; knowledge status follows frontmatter and requires Task-level execution evidence.
+
+### Limitations
 
 原教程只按 `CLOUD_COVER < 1` 过滤且随后多年取中值；正式时序任务需要逐期云/阴影掩膜和阈值验证。

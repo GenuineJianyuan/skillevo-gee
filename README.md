@@ -20,13 +20,22 @@ The project deliberately separates Hermes procedural skills from domain assets:
 | Hermes code skill | Generates auditable GEE JavaScript from an approved plan | `.hermes/skills/skillevo-code-agent/` |
 | Hermes audit skill | Reviews execution evidence and scientific limitations | `.hermes/skills/skillevo-audit-agent/` |
 | Hermes evolution skill | Prepares reviewed candidate knowledge changes | `.hermes/skills/skillevo-evolution-agent/` |
-| Capability index | Summarizes published Task coverage and boundaries | `knowledge/published/capabilities.md` |
+| Business capability router | Classifies normalized requests before Task knowledge is loaded | `knowledge/published/capabilities.md` |
 | Task | Defines a complete analysis objective and ordered workflow | `knowledge/published/tasks/` |
 | Subtask | Defines one reusable algorithmic step and its soft constraints | `knowledge/published/subtasks/` |
 | Example section | Scenario-specific code and evidence embedded in its owning Subtask | `knowledge/published/subtasks/*.md` |
 
 Task documents reference Subtask Markdown files. Example is content inside the
 owning Subtask rather than a separately indexed asset, and is not divided further.
+Every Task separates `Required workflow` from `Optional workflow`; every Subtask
+declares `operation: required|optional`. Catalog validation enforces the two
+classifications, canonical document structures, and cross-layer references.
+
+The Requirement Agent reads only `capabilities.md` for its first decision.
+`matched` requests may continue into Task/Subtask retrieval. `partial` and
+`unmatched` requests are stored under `runs/pending/autonomous-planning/` and
+must not use the current knowledge hierarchy. This is currently a pending queue,
+not an implemented autonomous planner.
 
 Task and Subtask documents are not individual Hermes `SKILL.md` files.
 They are versioned domain assets with stable IDs and explicit references. The
@@ -46,7 +55,7 @@ cd ../..
 ```
 
 ```powershell
-cd "D:\Project\Paper_Projects\GEE Agent\skillevo"
+cd "D:\Project\Paper_Projects\GEE Agent\skillevo-gee"
 python skillevo.py run "分析 2020-2022 年指定区域的季节性水域面积变化"
 
 # Lower-level diagnostics
