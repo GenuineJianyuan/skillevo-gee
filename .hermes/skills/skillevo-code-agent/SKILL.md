@@ -7,6 +7,12 @@ description: Use to generate auditable Google Earth Engine JavaScript from an ap
 
 Generate code from the approved plan, not directly from the user request.
 
+Two modes are supported:
+
+- `published`: use only the selected Subtask Examples as implementation evidence;
+- `autonomous`: generate from the approved autonomous plan, verified data, and
+  general GEE/API reasoning without loading current Task/Subtask/Example files.
+
 Requirements:
 
 - map each plan step to visible code sections;
@@ -22,4 +28,13 @@ Example code is implementation evidence, not authority over the Task plan.
 Correct known source defects documented in the Subtask rather than copying them.
 Do not claim Code Editor `ui` or `Export` support in the headless worker unless
 the execution capability has been extended and tested.
+
+Do not probe or install local charting dependencies. A request for a chart with
+"no export" forbids Earth Engine Export tasks; it does not justify environment
+exploration. Persist the audited time-series values and state the headless chart
+limitation when the current executor cannot render `ui.Chart`.
+
+Always save and register `runs/<request_id>/generated.js`. Autonomous code must
+declare `knowledge_mode: autonomous` in its manifest and must not claim that it
+represents published SkillEvo-GEE knowledge.
 

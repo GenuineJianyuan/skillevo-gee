@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-TIMESERIES-TABLE-EXPORT-001
 kind: subtask
-title: 影像集合区域时间序列表格化
+title: Convert Image-Collection Regional Statistics to a Time-Series Table
 version: 0.1.0
 status: experimental
-summary: 对影像集合逐期执行区域归约，保存日期和值并准备 CSV 导出。
+summary: Reduce an image collection by region for each observation, retain dates and values, and prepare the result for CSV export.
 tags: [time-series, reduce-region, feature-collection, csv]
 references: []
-source: raw_GEE_case/GEE训练教程_ERA5风速时序与CSV导出.md
+source: raw_GEE_case ERA5 wind-speed time-series and CSV-export tutorial
 operation: required
 ---
 
 # Purpose
 
-把影像集合转换为包含日期、统计值和质量信息的 FeatureCollection。
+Convert an image collection into a FeatureCollection containing dates, statistics, and quality information.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-逐影像读取 `system:time_start`，对目标区域执行归约，将日期和值写入无几何 Feature，最后导出表格。
+Read `system:time_start` from each image, reduce over the target region, write dates and values into geometry-free Features, then export the table.
 
 ## Constraints
 
-- 归约尺度、投影和区域含义必须明确。
-- 空值不能直接强制转换为 `ee.Number`；应保留或过滤并记录原因。
-- Export 是异步任务，提交成功不等于导出完成。
+- Specify reduction scale, projection, and region semantics.
+- Do not cast null values directly to `ee.Number`; retain or filter them and record the reason.
+- Export is asynchronous; successful submission does not mean export completion.
 
 ## Example
 
 ### Scenario
 
-风速区域统计与 CSV 导出
+Regional Wind-Speed Statistics and CSV Export
 
-Source: `raw_GEE_case/GEE训练教程_ERA5风速时序与CSV导出.md`
+Source: raw_GEE_case ERA5 wind-speed time-series and CSV-export tutorial
 
 ### Implementation
 
@@ -58,4 +58,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-需要过滤或标记空值并监测异步导出任务；当前 demo worker 不支持 `Export`。
+Filter or flag null values and monitor the asynchronous export task. The current demo worker does not support `Export`.

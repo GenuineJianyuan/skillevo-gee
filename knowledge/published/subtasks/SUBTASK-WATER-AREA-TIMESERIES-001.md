@@ -1,47 +1,51 @@
 ---
 id: SUBTASK-WATER-AREA-TIMESERIES-001
 kind: subtask
-title: 水体掩膜面积与时间序列
-version: 0.1.0
+title: Water-Mask Area and Time Series
+version: 0.2.0
 status: experimental
-summary: 将逐期水体掩膜乘以像元面积，并按区域求和得到平方公里序列。
+summary: Multiply each observation's water mask by pixel area and sum by region to obtain an area series in square kilometers.
 tags: [water-area, pixel-area, time-series]
 references: []
-source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md
+source: raw_GEE_case Landsat 8 and MODIS surface-water time-series tutorial
 operation: required
 ---
 
 # Purpose
 
-从每期水体掩膜计算区域水域总面积，而不是水体面积影像的均值。
+Calculate total regional surface-water area from each observation's water mask rather than taking the mean of a water-area image.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-对指数应用产品适配阈值，生成布尔掩膜，乘 `pixelArea()/1e6` 后用 `sum` 归约到 ROI，并保留时间属性。
+Apply a product-appropriate threshold to the index, generate a Boolean mask, multiply by `pixelArea()/1e6`, reduce with `sum` over the ROI, and preserve temporal properties.
+
+When monthly output is requested, first calculate each observation's total area, then group observations by calendar month and apply an explicitly stated statistic such as median. Emit one feature per requested month, include the valid-observation count, and retain null for an empty month rather than silently interpolating it.
 
 ## Constraints
 
-- 指数比例因子和阈值必须与产品定义一致。
-- `mean` 归约不代表总面积；必须使用 `sum` 并明确 km2。
-- 需要处理云、积雪、缺测和岸线混合像元。
+- Index scale factors and thresholds must match the product definition.
+- For NDWI derived with `normalizedDifference`, use a threshold in the normalized `[-1, 1]` domain. The source tutorial's `>= 1` threshold belongs to its obsolete derived product and is invalid for this implementation.
+- A `mean` reduction is not total area; use `sum` and specify km2.
+- Handle clouds, snow, missing observations, and mixed shoreline pixels.
 
 ## Example
 
 ### Scenario
 
-MODIS 水体像元面积求和
+Sum MODIS Water-Pixel Areas
 
-Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
+Source: raw_GEE_case Landsat 8 and MODIS surface-water time-series tutorial
 
 ### Implementation
 
 ```javascript
+var threshold = 0; // starting value; justify or calibrate for the ROI
 var rows = ndwiCollection.map(function(image) {
-  var waterArea = image.gte(threshold).selfMask()
+  var waterArea = image.select('NDWI').gte(threshold).selfMask()
     .multiply(ee.Image.pixelArea()).divide(1e6).rename('water_km2');
   var total = waterArea.reduceRegion({
     reducer: ee.Reducer.sum(), geometry: roi, scale: scale, maxPixels: 1e9
@@ -56,4 +60,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-原教程的阈值 `>=1` 和 `ui.Chart.image.series(... mean ...)` 不能直接作为总面积算法使用。
+The source tutorial's `>=1` threshold and `ui.Chart.image.series(... mean ...)` cannot be used directly as a total-area algorithm.

@@ -20,3 +20,18 @@ Classify findings separately:
 Return the failed step and recommended rollback target. A zero exit code is not
 enough to pass audit, and an audit pass is not proof of scientific validity.
 
+## Knowledge-evolution audit
+
+After result audit, determine exactly one recommendation:
+
+- `add`: autonomous result is reusable and fills a genuine published gap;
+- `modify`: a published Task/Subtask was used but required a validated correction
+  or extension; identify every target asset and affected reference;
+- `needs_more_evidence`: execution or scientific evidence is insufficient;
+- `reject`: the result is invalid, non-reusable, duplicated, or unsafe to retain.
+
+Set `candidate_eligible=true` only when execution, data, plan, and acceptance
+checks pass and the recommendation is `add` or `modify`. Use `skillevo_audit` to
+persist `runs/<request_id>/audit.json` with evidence paths, knowledge issue, and
+scientific limitations. Runtime success alone never makes a candidate eligible.
+

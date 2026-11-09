@@ -41,6 +41,8 @@ class WorkflowStoreTests(unittest.TestCase):
             )
             self.assertTrue(queue_path.is_file())
             self.assertEqual(store.load(state.request.request_id), deferred)
+            started = store.start_autonomous_planning(deferred)
+            self.assertEqual(started.stage, WorkflowStage.AUTONOMOUS_PLANNING)
 
     def test_rejects_deferral_before_capability_stage(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

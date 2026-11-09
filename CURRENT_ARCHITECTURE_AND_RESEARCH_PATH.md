@@ -2,28 +2,30 @@
 
 > 用途：用于核对当前工程是否准确表达论文思路，并作为下一阶段开发路线。
 >
-> 状态基线：2026-11-06 当前本地工程。本文区分“已经实现”“已有结构但尚未闭环”“论文设想”，避免将规划写成实验事实。
+> 状态基线：2026-11-08 当前本地工程。本文区分“已经实现”“已有结构但尚未闭环”“论文设想”，避免将规划写成实验事实。
 
 ## 1. 当前项目的准确定位
 
 当前 SkillEvo-GEE 最适合被定义为：
 
-**一个由多层次领域知识资产约束、以 Hermes 负责运行时推理和角色调度、以 Python/Node 工具负责确定性执行的 GEE 代码生成与执行审计原型。**
+**一个由多层次领域知识资产约束、以 Hermes 负责运行时推理和角色调度、以 Python/Node 工具负责确定性执行，并支持能力外自主求解与受控知识演化的 GEE 代码生成与执行审计原型。**
 
-系统当前的主线不是“Agent 自主改变自身”，也还不是“完整的 Skill 自动演化系统”。已形成并经过真实验证的核心是：
+系统当前仍不是无人值守的“Agent 自主改变自身”，但已经具备能力外自主求解、审计和 Add/Modify 候选管理的工程路径。已形成的核心是：
 
 1. 将 GEE 分析知识组织为 `Capability -> Task -> Subtask`；
 2. 将 Example 作为 Subtask 的终端内容，而不是独立资产层；
 3. 由需求、规划、数据、代码、审计等职责型 Skill 约束 Hermes 的推理过程；
 4. 由 Python CLI 统一启动 Hermes；
-5. 由项目插件向 Hermes 暴露知识检索、工作流初始化和 GEE 执行工具；
-6. 由真实 Earth Engine 请求检查生成代码的可执行性和部分中间结果。
+5. 由项目插件向 Hermes 暴露知识检索、工作流、审计、演化和 GEE 执行工具；
+6. 由真实 Earth Engine 请求检查生成代码的可执行性和部分中间结果；
+7. 对能力外请求采用不读取正式 Task/Subtask 的 autonomous 模式；
+8. 对 Add/Modify 候选执行结构验证、人工批准和安全发布。
 
 因此，现阶段论文主问题应优先落在：
 
 > 多层次、可追踪的 Skill 知识能否改善 GEE 需求理解、方案规划、代码生成和执行诊断？
 
-“Skill 演化”可以保留为系统总目标和第二阶段研究问题，但当前不宜声称已经实现自动新增、修改、融合和发布的完整闭环。
+当前可以声称已经实现 Add/Modify 的候选工程闭环与发布门槛；不能声称已经实现无人值守的科学自主发现或自动发布。Merge 仍是审查流程设计。
 
 ## 2. 当前知识层次
 
@@ -47,7 +49,8 @@ capabilities.md
 
 它不按 Task 类型或验证状态拆分能力，也不包含完整算法和大段代码。
 只有 `matched` 才进入现有知识体系；`partial/unmatched` 写入待行区，且
-不得借用当前 Task/Subtask 自行补造方案。待行区当前只是队列，自主规划器尚未实现。
+不得借用当前 Task/Subtask 自行补造方案。待行记录保留能力缺口，随后请求以
+`knowledge_mode=autonomous` 进入自主规划、数据核查、代码生成、执行和审计。
 
 ### 2.2 Task
 
@@ -89,6 +92,7 @@ skillevo-gee/
 ├── README.md                   # 安装及运行说明
 ├── src/                        # 确定性程序逻辑
 │   ├── cli.py                  # run/catalog/gee/workflow 命令
+│   ├── evolution.py            # Add/Modify 候选、审批与安全发布
 │   ├── hermes_runner.py        # Python -> hermes chat
 │   ├── models.py               # 需求、计划、状态、执行、演化数据模型
 │   ├── workflow.py             # 状态机与失败回退规则
@@ -106,7 +110,7 @@ skillevo-gee/
 │   │   ├── tasks/
 │   │   └── subtasks/
 │   ├── candidates/             # 待审查的演化候选区
-│   └── evolution/              # 演化规则和模板，当前尚未闭环
+│   └── evolution/              # 演化规则和 Task/Subtask 模板
 ├── raw_GEE_case/               # 原始来源案例，不直接进入运行上下文
 ├── config/                     # GEE 配置模板和本机私有配置
 ├── runs/                       # 单次请求、生成代码、执行报告等运行产物
@@ -139,21 +143,23 @@ skillevo-gee/
 | `skillevo-data-agent` | 检查数据、波段、覆盖和预处理 | 代码生成前置核心 |
 | `skillevo-code-agent` | 将已批准方案转为 GEE JavaScript | 当前研究核心 |
 | `skillevo-audit-agent` | 执行、检查结果并分类失败 | 代码生成后置核心 |
-| `skillevo-evolution-agent` | 指导候选知识的新增/修改/融合 | 后续研究模块 |
+| `skillevo-evolution-agent` | 生成和审查 Add/Modify 候选；Merge 为后续扩展 | 演化模块 |
 
 严格地说，这些目前是 Hermes 中的**职责型 Skill**，并不等同于七个彼此隔离、各自拥有独立上下文和生命周期的进程级 Agent。论文若使用“多 Agent”，需要说明实现形式是“由 Supervisor 调度的角色化 Agent Skill”，或者后续真正实现独立 Agent 调用与消息协议。
 
 ### 3.3 `.hermes/plugins/skillevo-gee/`：模型与工程之间的工具边界
 
-当前插件注册三个工具：
+当前插件注册五个工具：
 
 | 工具 | 作用 | 成熟度 |
 |---|---|---|
 | `skillevo_catalog` | list/search/get/validate 正式知识 | 已实现 |
-| `skillevo_workflow_init` | 建立请求，或将能力外请求写入自主规划待行区 | 已实现 init/defer；自主规划器未实现 |
+| `skillevo_workflow_init` | 初始化、路由、状态推进和产物登记 | 已实现 |
+| `skillevo_audit` | 保存执行、科学边界和候选资格审计 | 已实现 |
+| `skillevo_evolution` | Add/Modify 候选创建、验证、审批、拒绝和发布 | 已实现 |
 | `skillevo_gee_execute` | 执行可信本地 GEE JS 并返回 JSON | 已实现并真实验证 |
 
-这三个工具已经建立最小可用闭环，但还不足以形成严格、可重复的完整代码生成实验流水线。后续需要增加计划保存、数据检查、代码产物登记、审计判定和状态推进等工具。
+这五个工具建立了状态、执行、审计和候选发布边界。计划和数据报告已可登记为产物，但其内容生成及科学正确性仍由 Hermes 和用户审查承担。
 
 ### 3.4 `knowledge/`：论文的主要研究对象
 
@@ -166,7 +172,7 @@ skillevo-gee/
 
 只有影像重采样链条完成了当前 worker 下的真实端到端验证。其余 6 个 Task 主要来自原始案例拆分，适合作为后续代码生成实验和知识修正样本，不能直接视作已经验证的系统能力。
 
-`knowledge/candidates` 和 `knowledge/evolution` 已表达发布隔离思想，但目前前者几乎为空，后者主要是规则文字和模板，尚无完整程序支持。
+`knowledge/candidates` 保存 Add/Modify 候选，`knowledge/evolution` 保存演化规则和模板；Python 已提供候选验证、审批和发布工具。候选为空表示当前没有待审查变更，不表示功能缺失。
 
 ### 3.5 `runs/`：可追踪实验记录
 
@@ -212,6 +218,8 @@ python skillevo.py run "用户的 GEE 分析需求"
   -> 结果或定向回退
 ```
 
+能力外路径为：`partial/unmatched -> pending record -> autonomous Data/Plan/Code/Execution/Audit -> candidate -> human approval -> publication`。
+
 ### 4.1 推荐的严格阶段顺序
 
 #### 阶段 A：需求规范化
@@ -222,8 +230,9 @@ python skillevo.py run "用户的 GEE 分析需求"
 
 只读 `capabilities.md` 并输出 `matched / partial / unmatched`。只有
 `matched` 才读取可能匹配的 Task；`partial/unmatched` 必须写入
-`runs/pending/autonomous-planning/`，不读取 Task/Subtask，也不让代码模型
-凭常识绕过知识边界。该状态表示“等待未来自主规划”，不表示已完成规划。
+`runs/pending/autonomous-planning/`，随后进入 autonomous 模式；该模式不读取
+Task/Subtask/Example，而以规范化需求、直接数据证据和通用 GEE/API 推理完成
+规划、代码、执行和审计。
 
 #### 阶段 C：最小知识包构建
 
@@ -272,17 +281,18 @@ GEE worker 进行真实云端求值。Audit Agent 分开判断：执行正确性
 | Capability/Task/Subtask 解析与校验 | 已实现 | 27 个资产通过结构、引用和操作分类校验 |
 | Task 到 Subtask 的稳定引用 | 已实现 | 无缺失或跨层引用 |
 | Subtask 内嵌 Example | 已实现 | 19/19 有统一章节和代码 |
-| 能力外请求待行路由 | 已实现 | partial/unmatched 可入队；自主规划器未实现 |
+| 能力外自主路径 | 部分实现 | 状态、工具和 Agent 契约已实现；科学规划内容由 Hermes 生成 |
 | GEE 云端执行与结构化结果 | 已实现 | 冒烟链 3 成功、0 失败 |
-| 工作流状态模型与失败分类 | 部分实现 | Python 有模型，插件只暴露 init |
+| 工作流状态模型与失败分类 | 已实现 | 插件支持 route、autonomous、transition 和 artifact |
 | 需求产物标准化 | 部分实现 | 模型存在，落盘协议未完全强制 |
 | 数据自动核查 | 初步定义 | 有 Data Skill，无专用数据探测工具 |
 | 计划门槛 | 初步定义 | 有 `AnalysisPlan` 模型，无保存/校验工具 |
 | 代码生成产物协议 | 初步定义 | 主要依赖 Hermes 自由写文件 |
-| 自动审计计划验收条件 | 部分实现 | 有运行统计，无通用判定器 |
+| 结构化审计与候选资格 | 已实现 | 四项门槛和 Add/Modify/Reject/More-evidence 推荐 |
 | 多 Task 组合实验 | 尚未验证 | 设计存在，缺少系统实验 |
 | 语义检索 | 未实现 | 当前是简单词项计数检索 |
-| Evolution add/modify/merge | 规则草案 | 尚无完整 CLI、候选状态机和发布器 |
+| Evolution add/modify | 已实现 | CLI、候选状态机、审批和回滚发布 |
+| Evolution merge | 规则草案 | 尚无语义合并与回归发布实现 |
 | 演化效果评估 | 未实现 | 尚无前后版本基准和回归集 |
 
 ## 6. 与论文思路的符合程度
@@ -303,7 +313,7 @@ GEE worker 进行真实云端求值。Audit Agent 分开判断：执行正确性
    **三类知识资产，Example 作为 Subtask 内嵌实现证据。**
 2. Task/Subtask 不是 Hermes 的独立 `SKILL.md`；它们是领域知识资产，由程序检索后注入 Agent 上下文。
 3. 当前七个 Agent 更准确地说是七个角色 Skill。若论文强调真正的多 Agent 协作，需要补充独立调用、上下文隔离和消息记录机制。
-4. 当前“演化”只改变知识上下文的目标是合理的，但自动新增、修改、融合、验证、发布尚未形成工程事实。
+4. Add/Modify 已有工程门槛；候选内容仍需 Agent 拆解和人工审核，Merge 尚未形成工程闭环。
 5. 当前实验能力主要证明代码执行基础设施，不足以证明复杂地理空间分析的科学正确性。
 
 ### 6.3 建议的论文中心论点
@@ -430,20 +440,20 @@ manifest 至少记录：
 
 ### 8.4 演化的最低工程闭环
 
-后续至少需要：
+当前已具备：
 
 - candidate manifest 和唯一 ID；
-- add/modify/merge CLI；
+- add/modify CLI；
 - published/candidate 双目录校验；
 - 引用影响分析；
 - Markdown 结构 diff；
 - Example 批量执行及证据关联；
 - 固定回归集；
 - 审批记录；
-- 原子发布和回滚；
+- 发布失败回滚；
 - capabilities 自动或半自动重建。
 
-在这些功能完成前，`EvolutionOperation`、`EvolutionCandidate`、演化指南和模板只能被描述为**演化数据结构与流程草案**。
+Add/Modify 已具备工程闭环；候选的科学拆解和 Markdown 内容仍由 Evolution Agent 与用户共同审查。Merge 仍属于流程草案。
 
 ## 9. 建议的实验设计
 
@@ -454,7 +464,7 @@ manifest 至少记录：
 - 验证不同 Task 是否能完成需求到代码到执行；
 - 记录首次成功率、失败类别和回退路径；
 - 验证产物是否完整可复现；
-- 验证能力外请求是否正确停止。
+- 验证能力外请求是否不读取现有知识并正确进入 autonomous 路径。
 
 ### 9.2 第二阶段：知识结构有效性
 
@@ -511,12 +521,12 @@ manifest 至少记录：
 - 固定模型、Hermes 配置、知识版本和 GEE runtime 版本；
 - 形成可重复的论文实验协议。
 
-### P4：实现受控演化最小闭环
+### P4：扩展受控演化闭环
 
-- 先实现 Add；
-- 再实现 Modify 和引用影响分析；
+- Add/Modify 候选、验证、批准和发布已经实现；
+- 下一步补充自动引用影响报告和 Example 批量回归；
 - 最后实现 Merge；
-- 所有发布均需要验证、回归和人工批准。
+- 继续保持所有发布均需要验证、回归和人工批准。
 
 ### P5：开展演化效果研究
 
@@ -532,7 +542,7 @@ manifest 至少记录：
 3. published 知识在分析运行中只读。
 4. GEE 成功执行不等于科学结论正确。
 5. experimental 资产不应被描述为已验证能力。
-6. Evolution Agent 当前是流程规范，不是完整演化引擎。
+6. Evolution Agent 已连接 Add/Modify 工具，但科学抽象和用户批准仍是必要环节；Merge 尚未实现。
 7. Hermes Skill 写入审批只保护 Hermes Skill；领域知识发布仍需要自己的候选、验证和审批机制。
 8. 如果论文主张多 Agent 优于单 Agent，需要补充真正的 Agent 隔离或清楚说明“角色化 Skill 调度”的实现定义。
 

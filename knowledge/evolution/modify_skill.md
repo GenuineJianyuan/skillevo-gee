@@ -1,8 +1,7 @@
-# Modify knowledge
+# Modify Knowledge
 
-1. Locate the target and every referencing asset.
-2. Preserve the new evidence and compare old and proposed content.
-3. Classify the change as correction, extension, or a distinct variant.
-4. Update candidates, validate references, and rerun affected embedded examples.
-5. Request approval before replacing a published asset.
-
+1. Locate the target asset and all dependents; record every target ID accurately in the Modify candidate.
+2. Preserve new evidence and compare the published and proposed versions.
+3. Determine whether the change is a correction, a reasonable extension, or a distinct variant.
+4. Update candidate files, increment versions, validate references, and rerun affected embedded Examples.
+5. Validate the complete catalog with the candidate overlaid, show the before/after diff and impact, and replace published assets only after explicit user approval. Keep rollback backups of replaced files.

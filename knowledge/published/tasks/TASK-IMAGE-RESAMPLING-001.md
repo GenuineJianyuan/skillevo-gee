@@ -18,8 +18,7 @@ real cloud-computed statistics from a small validation region.
 
 ## Applicability and boundaries
 
-适用于连续值影像的受控重采样对比，不适用于分类标签。该 Task 只验证指定影像、
-投影和小区域统计链是否可执行，不据此判断重采样方法的普遍科学适用性。
+Applies to controlled comparisons of resampled continuous imagery, not categorical labels. This Task verifies only that the specified image, projection, and small-region statistics workflow executes; it does not establish general scientific suitability of the resampling method.
 
 ## Inputs
 
@@ -47,9 +46,9 @@ None. All operations are necessary for this bounded comparison Task.
 
 ## Data dependencies
 
-- 固定且可访问的 Earth Engine 影像资产 ID。
-- 明确的连续值波段、原始投影、目标尺度和有效统计区域。
-- 当前 worker 对 `ee.Image` 图层和受限 Code Editor API 子集的支持。
+- A fixed, accessible Earth Engine image asset ID.
+- Explicit continuous-value bands, source projection, target scale, and valid statistics region.
+- Support in the current worker for `ee.Image` layers and the supported subset of the Code Editor API.
 
 ## Acceptance criteria
 
@@ -59,6 +58,6 @@ None. All operations are necessary for this bounded comparison Task.
 
 ## User confirmations
 
-- 确认影像资产、对比波段、验证区域与统计尺度。
-- 若目标数据是类别数据，应拒绝 bicubic 路径并重新规划方法。
+- Confirm the image asset, comparison bands, validation region, and statistics scale.
+- If the target data are categorical, reject the bicubic path and replan the method.
 

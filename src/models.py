@@ -31,6 +31,17 @@ class OperationRequirement(StrEnum):
     OPTIONAL = "optional"
 
 
+class CoverageRoute(StrEnum):
+    MATCHED = "matched"
+    PARTIAL = "partial"
+    UNMATCHED = "unmatched"
+
+
+class KnowledgeMode(StrEnum):
+    PUBLISHED = "published"
+    AUTONOMOUS = "autonomous"
+
+
 class KnowledgeMetadata(StrictModel):
     id: str = Field(pattern=r"^[A-Z][A-Z0-9-]+$")
     kind: AssetKind
@@ -114,6 +125,9 @@ class WorkflowStage(StrEnum):
     AUDIT = "audit"
     AWAITING_USER = "awaiting_user"
     PENDING_AUTONOMOUS_PLANNING = "pending_autonomous_planning"
+    AUTONOMOUS_PLANNING = "autonomous_planning"
+    CANDIDATE_PREPARATION = "candidate_preparation"
+    AWAITING_APPROVAL = "awaiting_approval"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -136,6 +150,9 @@ class WorkflowState(StrictModel):
     last_failure_class: FailureClass | None = None
     last_failure: str | None = None
     routing_reason: str | None = None
+    coverage_route: CoverageRoute | None = None
+    knowledge_mode: KnowledgeMode | None = None
+    candidate_id: str | None = None
     updated_at: datetime
 
 
@@ -159,12 +176,80 @@ class EvolutionOperation(StrEnum):
     MERGE = "merge"
 
 
+class CandidateStatus(StrEnum):
+    DRAFT = "draft"
+    VALIDATED = "validated"
+    AWAITING_APPROVAL = "awaiting_approval"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    PUBLISHED = "published"
+
+
+class AuditRecommendation(StrEnum):
+    ADD = "add"
+    MODIFY = "modify"
+    REJECT = "reject"
+    NEEDS_MORE_EVIDENCE = "needs_more_evidence"
+
+
+class AuditReport(StrictModel):
+    request_id: str
+    execution_passed: bool
+    data_passed: bool
+    plan_passed: bool
+    acceptance_passed: bool
+    candidate_eligible: bool
+    recommendation: AuditRecommendation
+    findings: list[str] = Field(default_factory=list)
+    scientific_limitations: list[str] = Field(default_factory=list)
+    knowledge_issue: str | None = None
+    evidence_paths: list[str] = Field(default_factory=list)
+    audited_at: datetime
+
+    @model_validator(mode="after")
+    def validate_candidate_eligibility(self):
+        passes = (
+            self.execution_passed
+            and self.data_passed
+            and self.plan_passed
+            and self.acceptance_passed
+        )
+        recommended = self.recommendation in {
+            AuditRecommendation.ADD,
+            AuditRecommendation.MODIFY,
+        }
+        if self.candidate_eligible != (passes and recommended):
+            raise ValueError(
+                "candidate_eligible requires all audit gates and an add/modify recommendation"
+            )
+        return self
+
+
 class EvolutionCandidate(StrictModel):
     candidate_id: str
+    request_id: str
     operation: EvolutionOperation
+    status: CandidateStatus = CandidateStatus.DRAFT
+    audit_recommendation: AuditRecommendation
     source_refs: list[str]
     target_asset_ids: list[str]
     rationale: str
     validation_evidence: list[str] = Field(default_factory=list)
-    approved: bool = False
+    proposed_files: list[str] = Field(default_factory=list)
+    validation_result: dict[str, Any] | None = None
+    approved_by: str | None = None
+    approved_at: datetime | None = None
+    published_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+    @model_validator(mode="after")
+    def validate_operation_targets(self):
+        if self.operation == EvolutionOperation.MODIFY and not self.target_asset_ids:
+            raise ValueError("modify candidate requires at least one target asset ID")
+        if self.operation == EvolutionOperation.ADD and self.target_asset_ids:
+            raise ValueError("add candidate cannot declare existing target asset IDs")
+        if self.audit_recommendation.value != self.operation.value:
+            raise ValueError("candidate operation must match the audit recommendation")
+        return self
 

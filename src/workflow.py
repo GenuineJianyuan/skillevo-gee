@@ -5,7 +5,14 @@ import json
 from pathlib import Path
 from uuid import uuid4
 
-from models import FailureClass, RequirementSpec, WorkflowStage, WorkflowState
+from models import (
+    CoverageRoute,
+    FailureClass,
+    KnowledgeMode,
+    RequirementSpec,
+    WorkflowStage,
+    WorkflowState,
+)
 
 
 _ALLOWED_TRANSITIONS = {
@@ -16,9 +23,12 @@ _ALLOWED_TRANSITIONS = {
     WorkflowStage.PLANNING: {WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
     WorkflowStage.CODE: {WorkflowStage.EXECUTION, WorkflowStage.PLANNING, WorkflowStage.FAILED},
     WorkflowStage.EXECUTION: {WorkflowStage.AUDIT, WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.FAILED},
-    WorkflowStage.AUDIT: {WorkflowStage.COMPLETED, WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
+    WorkflowStage.AUDIT: {WorkflowStage.COMPLETED, WorkflowStage.CODE, WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.AUTONOMOUS_PLANNING, WorkflowStage.CANDIDATE_PREPARATION, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
     WorkflowStage.AWAITING_USER: {WorkflowStage.REQUIREMENT, WorkflowStage.DATA, WorkflowStage.PLANNING, WorkflowStage.FAILED},
-    WorkflowStage.PENDING_AUTONOMOUS_PLANNING: set(),
+    WorkflowStage.PENDING_AUTONOMOUS_PLANNING: {WorkflowStage.AUTONOMOUS_PLANNING, WorkflowStage.FAILED},
+    WorkflowStage.AUTONOMOUS_PLANNING: {WorkflowStage.DATA, WorkflowStage.CODE, WorkflowStage.AWAITING_USER, WorkflowStage.FAILED},
+    WorkflowStage.CANDIDATE_PREPARATION: {WorkflowStage.AWAITING_APPROVAL, WorkflowStage.FAILED},
+    WorkflowStage.AWAITING_APPROVAL: {WorkflowStage.COMPLETED, WorkflowStage.CANDIDATE_PREPARATION, WorkflowStage.FAILED},
     WorkflowStage.COMPLETED: set(),
     WorkflowStage.FAILED: set(),
 }
@@ -83,6 +93,7 @@ class WorkflowStore:
         deferred = state.model_copy(update={
             "stage": WorkflowStage.PENDING_AUTONOMOUS_PLANNING,
             "routing_reason": reason,
+            "knowledge_mode": KnowledgeMode.AUTONOMOUS,
             "updated_at": datetime.now(timezone.utc),
         })
         self.save(deferred)
@@ -90,6 +101,49 @@ class WorkflowStore:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(deferred.model_dump_json(indent=2) + "\n", encoding="utf-8")
         return deferred, target
+
+    def set_capability_route(
+        self,
+        state: WorkflowState,
+        route: CoverageRoute,
+        reason: str,
+    ) -> WorkflowState:
+        if state.stage not in {WorkflowStage.REQUIREMENT, WorkflowStage.CAPABILITY}:
+            raise ValueError("Capability route can only be recorded before knowledge retrieval")
+        if state.stage == WorkflowStage.REQUIREMENT:
+            state = self.transition(state, WorkflowStage.CAPABILITY)
+        mode = KnowledgeMode.PUBLISHED if route == CoverageRoute.MATCHED else KnowledgeMode.AUTONOMOUS
+        routed = state.model_copy(update={
+            "coverage_route": route,
+            "knowledge_mode": mode,
+            "routing_reason": reason,
+            "updated_at": datetime.now(timezone.utc),
+        })
+        return self.save_and_return(routed)
+
+    def start_autonomous_planning(self, state: WorkflowState) -> WorkflowState:
+        if state.stage != WorkflowStage.PENDING_AUTONOMOUS_PLANNING:
+            raise ValueError("Only a pending request can start autonomous planning")
+        started = self.transition(state, WorkflowStage.AUTONOMOUS_PLANNING)
+        return self.save_and_return(started)
+
+    def register_artifact(
+        self,
+        state: WorkflowState,
+        name: str,
+        path: str,
+    ) -> WorkflowState:
+        artifacts = dict(state.artifact_paths)
+        artifacts[name] = path
+        updated = state.model_copy(update={
+            "artifact_paths": artifacts,
+            "updated_at": datetime.now(timezone.utc),
+        })
+        return self.save_and_return(updated)
+
+    def save_and_return(self, state: WorkflowState) -> WorkflowState:
+        self.save(state)
+        return state
 
     def transition(self, state: WorkflowState, target: WorkflowStage) -> WorkflowState:
         if target not in _ALLOWED_TRANSITIONS[state.stage]:

@@ -19,7 +19,7 @@ plausible summary values, rather than treating metadata access as execution proo
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
@@ -36,7 +36,7 @@ the geometry, scale, CRS, selected bands, and `maxPixels` bound.
 
 ### Scenario
 
-小区域多统计量 GEE 审计
+Multi-Statistic GEE Audit over a Small Region
 
 Source: `src/gee/runtime/worker.js`
 
@@ -56,9 +56,9 @@ var stats = image.reduceRegion({
 
 ### Validation
 
-现有 worker 已对原始、重采样和 NDVI 图层成功执行同类检查，云端失败数为零。
+The existing worker has successfully run equivalent checks for original, resampled, and NDVI layers, with zero cloud-side failures.
 
 ### Limitations
 
-小区域统计只能证明指定几何范围内存在可计算像元。它不能替代完整空间覆盖检查、
-精度验证、尺度敏感性分析或对结果科学意义的判断。
+Small-region statistics demonstrate only that computable pixels exist within the specified geometry. They do not replace full spatial-coverage checks,
+accuracy validation, scale-sensitivity analysis, or evaluation of the scientific meaning of results.

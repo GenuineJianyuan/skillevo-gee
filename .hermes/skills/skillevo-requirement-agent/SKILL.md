@@ -26,14 +26,14 @@ description: Use to normalize a geospatial request and route it against the publ
 4. Return `partial` when only part of the objective fits, or the user must narrow
    the objective before a published workflow is sufficient.
 5. Return `unmatched` when the objective is outside all published capabilities.
-6. For `partial` or `unmatched`, call `skillevo_workflow_init` with
-   `operation=defer`, the request ID, and the routing reason. Do not load, search,
-   cite, or adapt any current Task, Subtask, or embedded Example.
+6. Persist every route with `operation=route`. For `partial` or `unmatched`,
+   call `operation=defer` and then `operation=start_autonomous`. Do not load,
+   search, cite, adapt, or imitate any current Task, Subtask, or embedded Example.
 7. Only a `matched` request may load candidate Task documents. Do not read
    Subtasks or Example code at this stage.
 
-The deferred state is a pending queue entry. It does not mean that an autonomous
-planner has run or that the request is currently supported.
+The pending record preserves the capability gap. Starting autonomous planning
+does not claim current knowledge support; it starts an evidence-seeking fallback.
 
 Unknown information must remain explicit. Do not invent user assets, labels,
 thresholds, or scientific assumptions.

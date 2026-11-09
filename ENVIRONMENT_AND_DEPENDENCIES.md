@@ -1,6 +1,6 @@
 # SkillEvo-GEE 环境、Hermes 版本与依赖说明
 
-> 基线日期：2026-11-06（Asia/Shanghai）
+> 基线日期：2026-11-08（本文按项目环境快照记录）
 >
 > 本文记录当前已验证环境、运行模式、安装顺序和已知依赖风险。密钥、服务账号正文和其他凭据不得写入本文或提交到版本库。
 
@@ -99,8 +99,10 @@ python skillevo.py gee execute --script runs/<request_id>/generated.js
 | Hermes 内部 Python | `3.14.9` |
 | Hermes OpenAI SDK | `2.24.0` |
 | 当前默认模型 | `qwen3.8-flash` |
-| 当前 provider | `alibaba-cn` |
+| Hermes 全局默认 provider | `alibaba-cn` |
+| SkillEvo-GEE `run` provider | `skillevo-alibaba-fast` |
 | `run` 默认 reasoning | `none` |
+| `run` 默认 turns/预算 | `24` / `300` 秒 |
 
 说明：
 
@@ -113,20 +115,22 @@ python skillevo.py gee execute --script runs/<request_id>/generated.js
 
 | 项目 | 当前状态 |
 |---|---|
-| 项目插件 | `skillevo-gee v0.1.0` |
+| 项目插件 | `skillevo-gee v0.2.0` |
 | 插件状态 | enabled |
 | 插件隔离模式 | Hermes host process |
 | Plugin Doctor | 通过 |
-| 注册工具数 | 3 |
+| 注册工具数 | 5 |
 | 外部 Skills | 7 个 |
 | `skills.write_approval` | `true` |
 | Gateway | 正在运行，当前为手动启动 |
 | Gateway 登录自启动 | 未安装 |
 
-三个插件工具为：
+五个插件工具为：
 
 - `skillevo_catalog`；
 - `skillevo_workflow_init`；
+- `skillevo_audit`；
+- `skillevo_evolution`；
 - `skillevo_gee_execute`。
 
 当前外部 Skill 目录为：
@@ -211,9 +215,18 @@ skills:
   write_approval: true
   external_dirs:
     - D:/Project/Paper_Projects/GEE Agent/skillevo-gee/.hermes/skills
+providers:
+  skillevo-alibaba-fast:
+    base_url: "https://llm-atdjy50od0lcjl12.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+    key_env: "DASHSCOPE_API_KEY"
+    api_mode: "chat_completions"
+    extra_body:
+      enable_thinking: false
 ```
 
 `write_approval=true` 表示 Hermes 对 Skill 写入执行审批保护。它不等价于领域知识发布审批；`knowledge/published` 仍需项目自己的 candidate/review/publish 流程。
+
+`skillevo-alibaba-fast` 是本工程显式使用的专用 provider，不修改其他 Hermes 会话的全局默认 provider。Python 还会传入 `--reasoning none`，并在普通提示文本中加入 Qwen `/no_think` 指令。不要把 `/no_think` 放在 `-q` 内容的首字符，否则 Hermes 会把它解析成自身的 slash command。实测完整 Agent 工作流仍会记录 reasoning token，因此这里的可靠保证是“不在终端展示中间思考、限制回合并减少重复工具调用”，而不是服务端严格零 reasoning token。
 
 ### 4.2 插件安装位置
 
@@ -276,6 +289,18 @@ GEEExecutor
 ```
 
 因此，不应在系统环境中为 Hermes 和 GEE 共用一个全局代理。若当前网络不需要 GEE 代理，将 `proxy_url` 设置为 `direct`。
+
+### 5.1 终端输出与运行预算
+
+`python skillevo.py run ...` 默认使用 quiet 模式。Python 会捕获 Hermes 的 stdout/stderr，因此 Hermes 即使生成工具调用预览或文件 diff，也不会持续刷入用户终端；同时监视本次新建的 `runs/<request_id>/state.json`，在阶段变化时显示负责的 Agent，并默认每 15 秒显示 Agent、阶段、request_id 和耗时心跳。发现新 artifact 或局部回退时也会单独提示。运行结束后从 Hermes 会话库读取并显示最终回答，完整进程输出写入 `runs/hermes-logs/<timestamp>-<id>.log`。`--status-interval-sec N` 可调整心跳间隔；只有 `--show-progress` 会让 Hermes 直接继承终端输出，适合调试，不适合常规案例运行。
+
+日志头部明确记录 `outcome: succeeded|failed`、布尔型 `success`、`exit_code`、完成时间；失败时还记录 `failure_summary`。终端结束行同步显示 `[SkillEvo-GEE] SUCCESS` 或 `[SkillEvo-GEE] FAILED`。
+
+状态监视器在发现本次首次创建的 request 后即固定绑定，不会因为同一工作区另一个进程创建 request 而切换或重复告警。matched 模式的 Planning 是有界装配步骤：只读当前 request 已登记的 requirement、knowledge、data，单次生成并登记一份简洁 plan，禁止读取历史 runs 后重新研究方案。
+
+另一个终端可运行 `python skillevo.py workflow status --latest`，或用 `--request-id req-...` 查询指定工作流的当前 Agent、阶段、产物与失败信息。
+
+默认上限为 24 turns 和 300 秒。Task 所引用的 Subtask 使用 `catalog get-many` 一次批量读取，减少模型与工具往返。已明确当前数据集和波段时，数据检查直接写入最终脚本并与结果共用一次 GEE 执行；只有资产、访问、产品或波段确实未知时才创建独立 probe。可在诊断时通过 `--max-turns`、`--run-budget-sec` 调整，但上调预算不会修复错误的数据知识。正式路径应优先遵循 Task/Subtask 已记录的数据集、波段和修正规则，GEE 失败最多修正重试一次。Data/Code Agent 禁止探测或安装本地绘图库；无头执行器不支持的 `ui.Chart` 应作为限制报告，而不是触发环境探索。
 
 ## 6. 新机器部署顺序
 
@@ -403,6 +428,8 @@ hermes gateway restart
 python skillevo.py catalog validate
 hermes chat --reasoning none -q "Reply with exactly: ok"
 python skillevo.py run "只读调用 skillevo_catalog validate，只返回 ok 和 asset_count；不要执行 GEE。"
+# 仅在诊断中查看 Hermes 工具预览
+python skillevo.py run "同一诊断需求" --show-progress
 ```
 
 需要验证真实 GEE 时，再使用可信的本地脚本执行：
@@ -420,10 +447,10 @@ python skillevo.py gee execute --script runs/<request_id>/generated.js
 | Hermes 本体查询 | 正常 |
 | Hermes 配置检查 | Required 项无缺失 |
 | `skillevo-gee` 插件 | enabled |
-| Plugin Doctor | 通过，3 个工具注册成功 |
+| Plugin Doctor | 通过，`v0.2.0` 注册 5 个工具 |
 | Gateway | 运行中 |
 | Python 知识目录校验 | `ok=true`，27 个资产 |
-| Python 自动测试 | 10/10 通过 |
+| Python 自动测试 | 13/13 通过 |
 | Node 直接依赖 | 安装完整 |
 | GEE 云端冒烟 | 3 成功、0 失败 |
 

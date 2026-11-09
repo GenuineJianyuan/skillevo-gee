@@ -19,7 +19,7 @@ dev = ["pytest>=8", "ruff>=0.8"]
 skillevo-gee = "cli:main"
 
 [tool.setuptools]
-py-modules = ["cli", "hermes_runner", "models", "paths", "workflow"]
+py-modules = ["cli", "evolution", "hermes_runner", "models", "paths", "workflow"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

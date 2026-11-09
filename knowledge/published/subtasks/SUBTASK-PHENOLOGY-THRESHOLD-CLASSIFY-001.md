@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-PHENOLOGY-THRESHOLD-CLASSIFY-001
 kind: subtask
-title: EVI 百分位阈值物候阶段分类
+title: EVI Percentile-Threshold Phenological-Stage Classification
 version: 0.1.0
 status: experimental
-summary: 结合 EVI 水平和生长方向，以规则方式标记返青、成熟、衰老和枯黄阶段。
+summary: Combine EVI levels and growth direction to label green-up, maturity, senescence, and dormancy using rules.
 tags: [phenology, percentile, rule-classification]
 references: []
-source: raw_GEE_case/GEE训练教程_EVI植物生长季节表型分类.md
+source: raw_GEE_case EVI phenological-stage classification tutorial
 operation: required
 ---
 
 # Purpose
 
-使用区域/时序百分位阈值与上升下降状态对物候阶段进行规则分类。
+Classify phenological stages using regional/temporal percentile thresholds and rising/falling states.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-计算低、高 EVI 阈值；上升期按低高区间区分返青和成熟，下降期按高阈值区分衰老与枯黄，输出离散类别波段。
+Calculate low and high EVI thresholds. During rising periods, distinguish green-up and maturity using the low/high interval; during falling periods, distinguish senescence and dormancy using the high threshold. Output a discrete class band.
 
 ## Constraints
 
-- 阈值需要作物、区域和年份验证，案例值不能直接迁移。
-- 多个类别掩膜应互斥，并明确无数据与未分类像元。
-- 模态时间序列只能描述主导类别，可能隐藏空间异质性。
+- Validate thresholds by crop, region, and year; do not directly transfer values from the source example.
+- Class masks should be mutually exclusive, with no-data and unclassified pixels defined explicitly.
+- A modal time series describes only the dominant class and may hide spatial heterogeneity.
 
 ## Example
 
 ### Scenario
 
-EVI 方向与百分位物候规则
+EVI Direction and Percentile-Based Phenology Rules
 
-Source: `raw_GEE_case/GEE训练教程_EVI植物生长季节表型分类.md`
+Source: raw_GEE_case EVI phenological-stage classification tutorial
 
 ### Implementation
 
@@ -54,4 +54,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-类别 0 需要定义为未分类而非有效阶段；百分位参数须由区域样本或文献校准。
+Define class 0 as unclassified rather than a valid stage. Calibrate percentile parameters using regional samples or literature.

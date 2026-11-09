@@ -19,7 +19,7 @@ interpolation during the next reprojection.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 

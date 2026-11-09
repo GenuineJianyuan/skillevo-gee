@@ -32,6 +32,11 @@ class KnowledgeCatalogTests(unittest.TestCase):
         ids = [asset.metadata.id for asset, _ in matches]
         self.assertIn("TASK-IMAGE-RESAMPLING-001", ids)
 
+    def test_get_many_cli_shape_is_supported_by_catalog(self) -> None:
+        ids = ["SUBTASK-AOI-DEFINE-001", "SUBTASK-COLLECTION-FILTER-001"]
+        assets = [self.catalog.get(asset_id) for asset_id in ids]
+        self.assertEqual([asset.metadata.id for asset in assets], ids)
+
 
 if __name__ == "__main__":
     unittest.main()

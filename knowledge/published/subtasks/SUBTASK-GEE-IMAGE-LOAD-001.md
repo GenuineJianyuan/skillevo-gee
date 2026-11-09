@@ -19,7 +19,7 @@ configured project and must contain the bands required by downstream steps.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
@@ -36,7 +36,7 @@ scale, and value range are known for the product.
 
 ### Scenario
 
-固定 Landsat 8 影像加载
+Load a Fixed Landsat 8 Image
 
 Source: reference demo `script_320013.txt` (implementation embedded below)
 
@@ -49,9 +49,9 @@ Map.setCenter(-122.37383, 37.6193, 15);
 
 ### Validation
 
-该固定影像已通过现有 GEE worker 成功加载，并对 B4/B3/B2 返回有效像元统计。
+The existing GEE worker successfully loaded this fixed image and returned valid-pixel statistics for B4/B3/B2.
 
 ### Limitations
 
-该示例只验证固定资产的加载与像元可用性，不证明该数据集适合其他研究区域、
-时间范围或科学问题；更换产品后必须重新核对波段、单位和访问权限。
+This Example validates only the loading of a fixed asset and pixel availability. It does not establish that the dataset is suitable for other study regions,
+periods, or scientific questions. Recheck bands, units, and access permissions when changing products.

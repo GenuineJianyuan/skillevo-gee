@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-TERRACLIMATE-SOIL-PREPROCESS-001
 kind: subtask
-title: TerraClimate 土壤湿度过滤与预处理
+title: TerraClimate Soil-Moisture Filtering and Preprocessing
 version: 0.1.0
 status: experimental
-summary: 按区域和时间过滤 TerraClimate soil 波段，应用目录定义的缩放并保留时间属性。
+summary: Filter the TerraClimate soil band by region and period, apply catalog-defined scaling, and preserve temporal properties.
 tags: [terraclimate, soil-moisture, preprocessing]
 references: []
-source: raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md
+source: raw_GEE_case TerraClimate soil-moisture analysis tutorial
 operation: required
 ---
 
 # Purpose
 
-构造具有明确区域、时间、单位和质量状态的土壤湿度影像集合。
+Construct a soil-moisture image collection with explicit region, time, units, and quality status.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-加载 TerraClimate，选择 `soil`，使用半开日期区间过滤，依据数据目录应用比例因子，裁剪到目标几何并复制时间属性。
+Load TerraClimate, select `soil`, filter by a half-open date range, apply the scale factor from the data catalog, clip to the target geometry, and copy temporal properties.
 
 ## Constraints
 
-- 行政区选择不能仅依赖跨洲多点 `filterBounds` 后的隐式并集。
-- 比例因子和单位应从当前产品目录读取，不以教程常数为唯一依据。
-- 先检查集合大小、时间覆盖和有效像元。
+- Administrative-area selection must not rely solely on the implicit union returned by cross-continent multi-point `filterBounds`.
+- Read scale factors and units from the current product catalog; do not rely exclusively on tutorial constants.
+- Check collection size, temporal coverage, and valid pixels first.
 
 ## Example
 
 ### Scenario
 
-TerraClimate soil 波段预处理
+Preprocess the TerraClimate Soil Band
 
-Source: `raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md`
+Source: raw_GEE_case TerraClimate soil-moisture analysis tutorial
 
 ### Implementation
 
@@ -54,4 +54,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-`scaleFactor` 必须来自当前数据目录；原案例的 `0.1` 仅作为待核验来源记录。
+`scaleFactor` must come from the current data catalog; the source example's `0.1` is recorded only as a value requiring verification.

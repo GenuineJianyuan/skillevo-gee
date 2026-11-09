@@ -1,8 +1,10 @@
 name: skillevo-gee
-version: "0.1.0"
-description: "Structured SkillEvo-GEE knowledge, workflow, and Earth Engine execution tools."
+version: "0.2.0"
+description: "Structured knowledge, autonomous fallback, audit, evolution, and GEE execution tools."
 provides_tools:
   - skillevo_catalog
   - skillevo_workflow_init
+  - skillevo_audit
+  - skillevo_evolution
   - skillevo_gee_execute
 

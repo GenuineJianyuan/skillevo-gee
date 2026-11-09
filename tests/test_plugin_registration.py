@@ -1,6 +1,6 @@
 import importlib.util
-import json
 from pathlib import Path
+from unittest import mock
 import unittest
 
 
@@ -29,24 +29,35 @@ class PluginRegistrationTests(unittest.TestCase):
         module.register(context)
         self.assertEqual(
             [tool["name"] for tool in context.tools],
-            ["skillevo_catalog", "skillevo_workflow_init", "skillevo_gee_execute"],
+            [
+                "skillevo_catalog",
+                "skillevo_workflow_init",
+                "skillevo_audit",
+                "skillevo_evolution",
+                "skillevo_gee_execute",
+            ],
         )
-        result = context.tools[0]["handler"]({"operation": "validate"})
-        self.assertIn('"asset_count": 27', result)
+        with mock.patch.object(module, "_run", return_value='{"ok": true}') as run:
+            context.tools[0]["handler"]({"operation": "validate"})
+            self.assertEqual(run.call_args.args[1], ["catalog", "validate"])
 
-        workflow_tool = context.tools[1]
-        init_result = workflow_tool["handler"]({
-            "operation": "init",
-            "objective": "Map seasonal water area",
-        })
-        self.assertIn('"stage": "requirement"', init_result)
-        request_id = json.loads(init_result)["state"]["request"]["request_id"]
-        defer_result = workflow_tool["handler"]({
-            "operation": "defer",
-            "request_id": request_id,
-            "reason": "Only part of the objective matches published capabilities",
-        })
-        self.assertIn('"stage": "pending_autonomous_planning"', defer_result)
+            workflow_tool = context.tools[1]
+            workflow_tool["handler"]({
+                "operation": "init",
+                "objective": "Map seasonal water area",
+            })
+            self.assertEqual(
+                run.call_args.args[1],
+                ["workflow", "init", "--objective", "Map seasonal water area"],
+            )
+            workflow_tool["handler"]({
+                "operation": "defer",
+                "request_id": "req-test",
+                "reason": "Only part of the objective matches published capabilities",
+            })
+            self.assertEqual(run.call_args.args[1][:4], [
+                "workflow", "defer", "--request-id", "req-test",
+            ])
 
 
 if __name__ == "__main__":

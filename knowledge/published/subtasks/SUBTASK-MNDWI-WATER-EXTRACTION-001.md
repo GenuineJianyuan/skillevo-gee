@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-MNDWI-WATER-EXTRACTION-001
 kind: subtask
-title: Landsat MNDWI 水体提取
+title: Landsat MNDWI Water Extraction
 version: 0.1.0
 status: experimental
-summary: 使用绿光与短波红外波段计算 MNDWI，并按阈值生成水体掩膜。
+summary: Calculate MNDWI from green and shortwave-infrared bands and generate a water mask using a threshold.
 tags: [landsat, mndwi, water-mask]
 references: []
-source: raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md
+source: raw_GEE_case Landsat 8 and MODIS surface-water time-series tutorial
 operation: required
 ---
 
 # Purpose
 
-对经过云处理的 Landsat 影像计算 MNDWI，并生成研究区水体候选掩膜。
+Calculate MNDWI from cloud-screened Landsat imagery and generate a candidate water mask for the study region.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-计算 `(green - swir1) / (green + swir1)`，根据经过验证的阈值分类，并保留指数和水体掩膜。
+Calculate `(green - swir1) / (green + swir1)`, classify using a validated threshold, and retain both the index and water mask.
 
 ## Constraints
 
-- 先完成云、阴影和无效像元掩膜；中值合成会改变时序含义。
-- 阈值受浑浊度、建筑和阴影影响，需要区域验证。
-- 不同 Landsat 产品的波段名和缩放方式不同。
+- Apply cloud, shadow, and invalid-pixel masks first; a median composite changes temporal semantics.
+- Thresholds are affected by turbidity, built-up areas, and shadows and require regional validation.
+- Band names and scaling differ across Landsat products.
 
 ## Example
 
 ### Scenario
 
-Landsat 8 MNDWI 水体掩膜
+Landsat 8 MNDWI Water Mask
 
-Source: `raw_GEE_case/GEE训练教程_Landsat8_MODIS水域面积变化时序图表.md`
+Source: raw_GEE_case Landsat 8 and MODIS surface-water time-series tutorial
 
 ### Implementation
 
@@ -52,4 +52,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-原教程只按 `CLOUD_COVER < 1` 过滤且随后多年取中值；正式时序任务需要逐期云/阴影掩膜和阈值验证。
+The source tutorial filters only on `CLOUD_COVER < 1` and then takes a multi-year median. A production time-series Task requires per-observation cloud/shadow masking and threshold validation.

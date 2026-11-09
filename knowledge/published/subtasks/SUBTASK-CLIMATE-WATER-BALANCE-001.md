@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-CLIMATE-WATER-BALANCE-001
 kind: subtask
-title: 月尺度降水与 PET 水量平衡
+title: Monthly Precipitation and PET Water Balance
 version: 0.1.0
 status: experimental
-summary: 将降水和潜在蒸散集合按月份聚合并计算 P-PET 水量平衡。
+summary: Aggregate precipitation and potential-evapotranspiration collections by month and calculate the P-PET water balance.
 tags: [chirps, terraclimate, monthly, water-balance]
 references: []
-source: raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md
+source: raw_GEE_case CHIRPS and TerraClimate drought-index tutorial
 operation: required
 ---
 
 # Purpose
 
-对齐 CHIRPS 日降水与 TerraClimate PET，按明确年月聚合后计算水量平衡。
+Align daily CHIRPS precipitation with TerraClimate PET, aggregate by explicit year-month, and calculate water balance.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-分别对每个年月过滤并求和，统一波段名、单位、投影语义和时间属性，再计算 `P - PET`。
+Filter and sum each year-month separately, align band names, units, projection semantics, and time properties, then calculate `P - PET`.
 
 ## Constraints
 
-- 不应把多个年份的同名月份直接合成一幅图，除非目标确实是多年月份气候态。
-- PET 比例因子必须在相减前应用；时间端点采用半开区间更稳妥。
-- 两个集合的月份必须一一对应，并检查空集合。
+- Do not combine the same month across multiple years into one image unless the goal is a multi-year monthly climatology.
+- Apply the PET scale factor before subtraction; half-open temporal intervals are preferable.
+- Months in the two collections must correspond one-to-one, and empty collections must be checked.
 
 ## Example
 
 ### Scenario
 
-CHIRPS 与 TerraClimate 月水量平衡
+Monthly Water Balance from CHIRPS and TerraClimate
 
-Source: `raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md`
+Source: raw_GEE_case CHIRPS and TerraClimate drought-index tutorial
 
 ### Implementation
 
@@ -55,4 +55,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-原教程按月份跨年份求和，可能丢失逐年月序列；正式实现必须显式遍历 year-month，并核对 PET 比例因子。
+The source tutorial sums by month across years, which may lose the year-month series. A production implementation must iterate explicitly over year-month pairs and verify the PET scale factor.

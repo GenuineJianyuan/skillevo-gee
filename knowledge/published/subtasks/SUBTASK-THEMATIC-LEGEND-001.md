@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-THEMATIC-LEGEND-001
 kind: subtask
-title: GEE 专题图分级与图例
+title: GEE Thematic Classification and Legend
 version: 0.1.0
 status: experimental
-summary: 根据已验证的等级阈值和颜色构建专题图层与 Code Editor 图例。
+summary: Build thematic layers and a Code Editor legend from validated class thresholds and colors.
 tags: [visualization, legend, ui]
 references: []
-source: raw_GEE_case/GEE教程_MOD44W印度土壤盐分可视化.md
+source: raw_GEE_case soil-salinity visualization tutorial
 operation: optional
 ---
 
 # Purpose
 
-把科学上已定义的分级映射为颜色并在 GEE Code Editor 中显示图例。
+Map scientifically defined classes to colors and display a legend in the GEE Code Editor.
 
 ## Operation classification
 
-`optional`。该操作只影响展示或交付，不改变核心分析结果。
+`optional`. This operation affects only presentation or delivery; it does not change core analysis results.
 
 ## Procedure
 
-维护有序的阈值、标签和颜色三元组；地图样式和图例由同一配置生成，避免二者漂移。
+Maintain ordered threshold-label-color tuples. Generate map styling and the legend from the same configuration to prevent inconsistencies.
 
 ## Constraints
 
-- `ui.*` 仅适用于 Code Editor，当前无 UI 的执行 worker 不支持。
-- 类别数、阈值数和颜色数必须一致。
-- 图例不能替代数据单位、范围和分类依据说明。
+- `ui.*` is available only in the Code Editor and is not supported by the current UI-less execution worker.
+- The number of classes, thresholds, and colors must be consistent.
+- A legend does not replace explanations of data units, ranges, or classification rationale.
 
 ## Example
 
 ### Scenario
 
-盐分等级 Code Editor 图例
+Soil-Salinity Class Legend in the Code Editor
 
-Source: `raw_GEE_case/GEE教程_MOD44W印度土壤盐分可视化.md`
+Source: raw_GEE_case soil-salinity visualization tutorial
 
 ### Implementation
 
@@ -55,4 +55,4 @@ Status: `optional` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-该片段只定义展示配置。等级阈值必须另有数据依据，`ui.*` 不受当前无头 worker 支持。
+This snippet defines presentation settings only. Class thresholds require separate data-based justification, and `ui.*` is not supported by the current headless worker.

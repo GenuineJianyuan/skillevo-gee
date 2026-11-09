@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-WATER-BALANCE-STANDARDIZE-001
 kind: subtask
-title: 水量平衡标准化与干旱结果输出
+title: Water-Balance Standardization and Drought Outputs
 version: 0.1.0
 status: experimental
-summary: 对水量平衡序列进行标准化，筛选目标时段并准备地图或导出结果。
+summary: Standardize the water-balance series, select target periods, and prepare map or export outputs.
 tags: [drought-index, standardization, export]
 references: []
-source: raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md
+source: raw_GEE_case CHIRPS and TerraClimate drought-index tutorial
 operation: required
 ---
 
 # Purpose
 
-将水量平衡序列转换为可比较指标，并生成指定月份的汇总结果。
+Transform the water-balance series into comparable indicators and produce summaries for specified months.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-实验例采用 `(x-mean)/stdDev`。严格 SPEI 需要积累尺度、概率分布拟合和标准正态变换，应作为不同实现明确标注。
+The experimental Example uses `(x-mean)/stdDev`. A rigorous SPEI requires an accumulation scale, probability-distribution fitting, and standard-normal transformation and must be clearly identified as a different implementation.
 
 ## Constraints
 
-- 标准差为零或样本过短时必须终止或标记无效。
-- 不能把简化 z-score 标为严格 SPEI 验证结果。
-- 导出区域应使用几何而非未经处理的 FeatureCollection，并检查任务状态。
+- Stop or mark results invalid when standard deviation is zero or the sample is too short.
+- Do not label a simplified z-score as a rigorously validated SPEI result.
+- Use a geometry, not an unprocessed FeatureCollection, for the export region and check task status.
 
 ## Example
 
 ### Scenario
 
-水量平衡 z-score 演示
+Water-Balance Z-Score Demonstration
 
-Source: `raw_GEE_case/GEE教程_CHIRPS_TerraClimate_SPEI干旱指数.md`
+Source: raw_GEE_case CHIRPS and TerraClimate drought-index tutorial
 
 ### Implementation
 
@@ -55,4 +55,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-这是 z-score，不应命名为严格 SPEI。短序列和零标准差像元需要显式处理。
+This is a z-score and must not be named rigorous SPEI. Explicitly handle short series and zero-standard-deviation pixels.

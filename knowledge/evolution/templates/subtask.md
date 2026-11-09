@@ -7,27 +7,27 @@ status: candidate
 summary: Replace with the method purpose and core input/output semantics.
 tags: []
 references: []
-source: Replace with source identity
+source: Replace with the source identifier
 operation: required
 ---
 
 # Purpose
 Describe the reusable step and its input/output semantics.
 ## Operation classification
-State `required` or `optional` and explain why.
+Declare `required` or `optional` and explain why.
 ## Procedure
-List the ordered method steps and expected intermediate result.
+List the ordered method steps and expected intermediate results.
 ## Constraints
-List data, scale, parameter, and failure boundaries.
+List data, scale, parameters, and failure boundaries.
 ## Example
 ### Scenario
-Describe the source scenario and cite its provenance.
+Describe the source scenario and record provenance.
 ### Implementation
 ```javascript
-// Include a self-contained implementation fragment.
+// Add a self-contained implementation snippet.
 ```
 ### Validation
 Record execution evidence or explicitly state that validation is pending.
 ### Limitations
-State what this Example does not establish.
+Describe what this Example does not establish.
 

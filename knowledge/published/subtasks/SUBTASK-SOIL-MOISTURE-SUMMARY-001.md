@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-SOIL-MOISTURE-SUMMARY-001
 kind: subtask
-title: 土壤湿度空间汇总与区域时间序列
+title: Soil-Moisture Spatial Summary and Regional Time Series
 version: 0.1.0
 status: experimental
-summary: 生成土壤湿度时间均值图，并对每期影像执行区域统计形成时间序列。
+summary: Generate a temporal-mean soil-moisture image and a time series from regional statistics for each observation.
 tags: [soil-moisture, spatial-summary, time-series]
 references: []
-source: raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md
+source: raw_GEE_case TerraClimate soil-moisture analysis tutorial
 operation: required
 ---
 
 # Purpose
 
-从预处理集合生成空间概览与区域统计序列。
+Generate a spatial overview and regional statistics series from the preprocessed collection.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-用集合时间均值生成地图层；逐期以适配的 reducer 和尺度对研究区归约，保留日期、统计值和有效像元信息。
+Generate a map layer from the collection's temporal mean. Reduce each observation over the study region with an appropriate reducer and scale, retaining date, statistic, and valid-pixel information.
 
 ## Constraints
 
-- 调色板最小/最大值必须来源于数据分布或产品范围。
-- 区域均值可能掩盖空间异质性，应同时记录有效面积或分区结果。
-- Code Editor 图表和 UI 图例不是无头执行环境的审计输出。
+- Palette minimum/maximum values must be based on the data distribution or product range.
+- Regional means may hide spatial heterogeneity; also record valid area or stratified results.
+- Code Editor charts and UI legends are not audit outputs for a headless execution environment.
 
 ## Example
 
 ### Scenario
 
-土壤湿度空间均值与区域序列
+Soil-Moisture Spatial Mean and Regional Series
 
-Source: `raw_GEE_case/GEE训练教程_TerraClimate土壤湿度分析.md`
+Source: raw_GEE_case TerraClimate soil-moisture analysis tutorial
 
 ### Implementation
 
@@ -55,4 +55,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-地图可视化范围需要从统计量确定；跨多个国家或不连续几何的均值必须解释其空间含义。
+Determine map visualization ranges from statistics. Explain the spatial meaning of means over multiple countries or disconnected geometries.

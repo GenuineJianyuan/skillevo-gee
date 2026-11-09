@@ -1,10 +1,10 @@
 ---
 id: SUBTASK-COLLECTION-FILTER-001
 kind: subtask
-title: 加载并过滤 Earth Engine 影像集合
-version: 0.1.0
+title: Load and Filter an Earth Engine Image Collection
+version: 0.2.0
 status: experimental
-summary: 按产品、波段、AOI 和半开时间范围构建非空影像集合，并保留后续分析所需属性。
+summary: Build a non-empty image collection by product, band, AOI, and half-open date range while preserving attributes needed downstream.
 tags: [data-access, image-collection, filter]
 references: []
 source: raw_GEE_case
@@ -13,25 +13,27 @@ operation: required
 
 # Purpose
 
-为分析方法提供经过身份、波段、时间和空间检查的输入集合。
+Provide an input collection checked for product identity, bands, temporal range, and spatial extent.
 
 ## Operation classification
 
-`required`。凡 Task 依赖 ImageCollection，必须先完成数据加载与过滤。
+`required`. Data loading and filtering must be completed before any Task that depends on an ImageCollection.
 
 ## Procedure
 
-使用明确数据集 ID 创建集合，选择精确波段，按 AOI 和 `[start, end)` 时间范围过滤，应用必要的比例因子和 QA，并检查集合大小与首幅影像波段。
+Create the collection from an explicit dataset ID, select exact bands, filter by AOI and `[start, end)`, apply required scale factors and QA, and check collection size and the first image's bands.
 
 ## Constraints
 
-不得使用可能选择多组语义的宽泛正则；产品版本、缩放因子和 QA 必须依据当前目录；空集合必须阻断后续代码。
+Do not use broad regular expressions that may select multiple semantic groups. Verify product version, scale factors, and QA against the current catalog. An empty collection must stop downstream code.
+
+For the published water-area Task, use an official Collection 6.1 surface-reflectance product containing both `sur_refl_b04` (green) and `sur_refl_b02` (near infrared), such as `MODIS/061/MYD09A1` or `MODIS/061/MOD09A1`. Compute and rename the normalized difference to `NDWI`. Do not call `.select('NDWI')` on `MOD13A1` or `MOD13Q1`: they have no direct NDWI band and lack the required green band. Do not use the obsolete tutorial collection `MODIS/MYD09GA_006_NDWI` as a runtime dataset.
 
 ## Example
 
 ### Scenario
 
-加载指定时期和区域的 TerraClimate PET。
+Load TerraClimate PET for a specified period and region.
 
 ### Implementation
 
@@ -45,8 +47,26 @@ print('collection_size', collection.size());
 
 ### Validation
 
-验证集合大小、首末时间、波段名、单位和 AOI 内有效像元。
+Validate collection size, first and last timestamps, band names, units, and valid pixels within the AOI.
 
 ### Limitations
 
-集合存在不代表适合当前科学问题；产品更换时必须重新核验参数。
+The existence of a collection does not establish its suitability for the scientific question. Revalidate parameters whenever the product changes.
+
+### Published water-area specialization
+
+```javascript
+var ndwiCollection = ee.ImageCollection('MODIS/061/MYD09A1')
+  .filterBounds(roi)
+  .filterDate(start, end)
+  .select(['sur_refl_b04', 'sur_refl_b02'])
+  .map(function(image) {
+    var ndwi = image.normalizedDifference(['sur_refl_b04', 'sur_refl_b02'])
+      .rename('NDWI');
+    return ndwi.copyProperties(image, ['system:time_start']);
+  });
+print('ndwi_collection_size', ndwiCollection.size());
+print('ndwi_bands', ndwiCollection.first().bandNames());
+```
+
+Both reflectance bands share the same scale factor, so it cancels in the normalized difference. Apply the product QA mask before index calculation when the requested scientific quality requires it.

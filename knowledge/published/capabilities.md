@@ -11,46 +11,48 @@ references: [TASK-DROUGHT-SPEI-001, TASK-WIND-SPEED-TIMESERIES-001, TASK-SOIL-MO
 
 # Published capabilities
 
-SkillEvo-GEE 的总能力是：依据已发布的地理空间分析知识，将用户需求转换为可追踪的 GEE 分析流程、代码和执行审计结果。下面按照业务分析体系描述能力范围；Task 是能力分类下的具体实现入口，不按验证状态或任务类型分区。
+SkillEvo-GEE transforms user requests into traceable GEE analysis workflows, code, and execution audits using published geospatial-analysis knowledge. The sections below describe the business-analysis capability taxonomy. Tasks are concrete implementation entry points within each capability and are not grouped by verification status or task type.
 
-## 气候与陆面环境时序分析
+## Climate and Land-Surface Environmental Time-Series Analysis
 
-面向具有明确区域、时间范围和环境变量的数据加载、时间聚合、指标计算、区域统计与时序输出。当前覆盖降水—潜在蒸散水量平衡、ERA5 风速和 TerraClimate 土壤湿度。
+Supports data loading, temporal aggregation, indicator calculation, regional statistics, and time-series output for explicit regions, periods, and environmental variables. Current coverage includes precipitation–potential evapotranspiration water balance, ERA5 wind speed, and TerraClimate soil moisture.
 
-- [`TASK-DROUGHT-SPEI-001`](tasks/TASK-DROUGHT-SPEI-001.md)：以 CHIRPS 和 TerraClimate 构建月尺度水量平衡及标准化干旱指标。
-- [`TASK-WIND-SPEED-TIMESERIES-001`](tasks/TASK-WIND-SPEED-TIMESERIES-001.md)：由 ERA5 水平风分量计算风速并生成区域时序，按需导出 CSV。
-- [`TASK-SOIL-MOISTURE-TIMESERIES-001`](tasks/TASK-SOIL-MOISTURE-TIMESERIES-001.md)：处理 TerraClimate 土壤湿度并生成空间汇总和区域时序。
+- [`TASK-DROUGHT-SPEI-001`](tasks/TASK-DROUGHT-SPEI-001.md): Build monthly water balance and standardized drought indicators from CHIRPS and TerraClimate.
+- [`TASK-WIND-SPEED-TIMESERIES-001`](tasks/TASK-WIND-SPEED-TIMESERIES-001.md): Derive wind speed from ERA5 horizontal components and produce regional time series, with optional CSV export.
+- [`TASK-SOIL-MOISTURE-TIMESERIES-001`](tasks/TASK-SOIL-MOISTURE-TIMESERIES-001.md): Process TerraClimate soil moisture and produce spatial summaries and regional time series.
 
-## 植被物候分析
+## Vegetation Phenology Analysis
 
-面向遥感植被指数时序的预处理、滞后关系构建、生长方向判断和规则化物候阶段识别。
+Supports preprocessing remote-sensing vegetation-index time series, constructing lag relationships, identifying growth direction, and rule-based phenological-stage classification.
 
-- [`TASK-EVI-PHENOLOGY-001`](tasks/TASK-EVI-PHENOLOGY-001.md)：使用 MODIS EVI、滞后匹配和百分位阈值识别物候阶段。
+- [`TASK-EVI-PHENOLOGY-001`](tasks/TASK-EVI-PHENOLOGY-001.md): Identify phenological stages using MODIS EVI, lag matching, and percentile thresholds.
 
-## 水体提取与水域变化分析
+## Water Extraction and Surface-Water Change Analysis
 
-面向光学遥感水体指数计算、水体掩膜、逐期像元面积统计和水域面积时序分析。
+Supports optical-remote-sensing water-index calculation, water masking, per-observation pixel-area statistics, and surface-water area time-series analysis.
 
-- [`TASK-WATER-AREA-TIMESERIES-001`](tasks/TASK-WATER-AREA-TIMESERIES-001.md)：结合 Landsat MNDWI 参考与 MODIS NDWI 时序估计水域面积变化。
+- [`TASK-WATER-AREA-TIMESERIES-001`](tasks/TASK-WATER-AREA-TIMESERIES-001.md): Estimate surface-water area change using Landsat MNDWI references and MODIS NDWI time series.
 
-## 土壤专题制图
+## Soil Thematic Mapping
 
-面向土壤属性栅格的区域裁剪、辅助掩膜和专题表达。当前仅覆盖土壤盐分与水体掩膜组合场景。
+Supports regional clipping, auxiliary masking, and thematic representation of soil-property rasters. Current coverage is limited to combining soil salinity with a water mask.
 
-- [`TASK-SOIL-SALINITY-VISUALIZATION-001`](tasks/TASK-SOIL-SALINITY-VISUALIZATION-001.md)：加载盐分数据，排除水体并按需生成专题图例。
+- [`TASK-SOIL-SALINITY-VISUALIZATION-001`](tasks/TASK-SOIL-SALINITY-VISUALIZATION-001.md): Load salinity data, mask water, and optionally generate a thematic legend.
 
-## 栅格处理与执行诊断
+## Raster Processing and Execution Diagnostics
 
-面向连续型影像的重采样处理和小区域真实像元统计，用于验证 GEE 执行链及处理结果。
+Supports resampling continuous imagery and computing real-pixel statistics over small regions to verify the GEE execution path and outputs.
 
-- [`TASK-IMAGE-RESAMPLING-001`](tasks/TASK-IMAGE-RESAMPLING-001.md)：比较原始影像与双三次重采样影像并检查区域统计。
+- [`TASK-IMAGE-RESAMPLING-001`](tasks/TASK-IMAGE-RESAMPLING-001.md): Compare original and bicubic-resampled imagery and inspect regional statistics.
 
 ## Routing rule
 
-Requirement Agent 必须先将需求规范化，再仅依据上述能力介绍判断业务范围：
+The Requirement Agent must first normalize the request, then determine business-scope coverage using only the capability descriptions above:
 
-1. `matched`：至少一项能力在目标、数据语义和预期输出上可覆盖需求，才允许读取该能力下的 Task，并继续知识检索、数据检查和规划。
-2. `partial`：只有部分目标在范围内时，列出已覆盖与未覆盖部分；不得使用现有 Task 补造未覆盖步骤，默认进入待行区，除非用户明确缩小目标。
-3. `unmatched`：没有能力匹配时，不读取 Task/Subtask，不依赖当前知识体系生成代码；调用 workflow defer，将请求写入 `runs/pending/autonomous-planning/`。自主规划器尚未实现，当前只入队并报告原因。
+1. `matched`: At least one capability covers the request's goal, data semantics, and expected outputs. Only then may the agent read Tasks under that capability and continue with knowledge retrieval, data checks, and planning.
+2. `partial`: When only part of the goal is covered, identify covered and uncovered parts. Do not combine an existing Task with improvised steps. Record the request in the pending queue, then process the full request in `autonomous` mode without reading published Tasks, Subtasks, or Examples; independently decompose it, inspect data, generate code, execute, and audit.
+3. `unmatched`: When no capability matches, do not read published Tasks, Subtasks, or Examples. Add the request to `runs/pending/autonomous-planning/` and enter `autonomous` mode, generating and executing code from the normalized request, direct data evidence, and general GEE/API reasoning.
 
-匹配依据是业务语义，不是关键词命中。资产状态和科学限制在选中 Task 后再检查，不用于把能力目录拆成不同任务类型。
+Autonomous results are first stored in `runs/<request_id>/`. Add/Modify candidates under `knowledge/candidates/` may be created only when execution, plan, and scientific-boundary audits satisfy candidate criteria. Candidates still require explicit user approval, structural validation, and regression checks before publication and before this document is updated.
+
+Matching is based on business semantics, not keyword hits. Asset status and scientific constraints are checked after a Task is selected; they are not grounds for splitting the capability catalog into task-type categories.

@@ -1,10 +1,10 @@
 ---
 id: SUBTASK-AOI-DEFINE-001
 kind: subtask
-title: 定义和验证分析区域
+title: Define and Validate the Analysis Region
 version: 0.1.0
 status: experimental
-summary: 将用户几何、点集或行政区资产转换为语义明确且可用于过滤、裁剪和归约的 AOI。
+summary: Convert user geometry, point sets, or administrative-boundary assets into a semantically explicit AOI for filtering, clipping, and reduction.
 tags: [aoi, geometry, boundary]
 references: []
 source: raw_GEE_case
@@ -13,25 +13,25 @@ operation: required
 
 # Purpose
 
-为后续数据过滤和空间计算建立明确的研究区域。
+Establish an explicit study region for subsequent data filtering and spatial computation.
 
 ## Operation classification
 
-`required`。所有当前业务 Task 都依赖空间范围；地图居中和边界显示不是本操作的必要部分。
+`required`. All current business Tasks depend on a spatial extent; map centering and boundary display are not required parts of this operation.
 
 ## Procedure
 
-读取用户几何或可访问的边界资产，检查几何类型、有效性和空间语义；必要时合并或缓冲，并输出单一 AOI geometry。
+Read user geometry or an accessible boundary asset and check geometry type, validity, and spatial semantics. Merge or buffer when necessary, then output a single AOI geometry.
 
 ## Constraints
 
-不得把跨区域多点 `filterBounds` 返回的多个行政区隐式当作目标区域；私有资产必须先验证权限；缓冲距离和投影需明确。
+Do not implicitly treat multiple administrative areas returned by a cross-region, multi-point `filterBounds` as the target region. Verify access to private assets first; specify buffer distance and projection.
 
 ## Example
 
 ### Scenario
 
-从 GAUL 国家边界中选择与用户几何相交的区域。
+Select country boundaries from GAUL that intersect the user geometry.
 
 ### Implementation
 
@@ -43,8 +43,8 @@ var aoi = candidates.geometry();
 
 ### Validation
 
-检查候选数量、AOI 面积、边界范围以及与用户目标的语义一致性。
+Check candidate count, AOI area, boundary extent, and semantic consistency with the user's target.
 
 ### Limitations
 
-相交过滤不等于名称级行政区选择；跨国或不连续区域需要用户确认。
+Intersection filtering is not equivalent to name-based administrative-area selection; cross-country or disconnected regions require user confirmation.

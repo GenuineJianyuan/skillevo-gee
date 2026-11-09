@@ -1,41 +1,41 @@
 ---
 id: SUBTASK-EVI-LAG-SWITCH-001
 kind: subtask
-title: EVI 滞后匹配与生长方向开关
+title: EVI Lag Matching and Growth-Direction Signal
 version: 0.1.0
 status: experimental
-summary: 为 EVI 影像匹配较早观测并依据当前值与滞后值关系构建生长方向波段。
+summary: Match each EVI image to an earlier observation and derive a growth-direction band from current and lagged values.
 tags: [evi, temporal-join, lag, growing-season]
 references: []
-source: raw_GEE_case/GEE训练教程_EVI植物生长季节表型分类.md
+source: raw_GEE_case EVI phenological-stage classification tutorial
 operation: required
 ---
 
 # Purpose
 
-为每个时相寻找指定窗口内的前一有效 EVI 观测，并判断植被指数上升或下降。
+Find the previous valid EVI observation within a specified window for each time step and determine whether the vegetation index is rising or falling.
 
 ## Operation classification
 
-`required`。该操作是其所属 Task 核心分析链的一部分。
+`required`. This operation is part of the core analysis workflow of its owning Task.
 
 ## Procedure
 
-用 `maxDifference` 与时间先后过滤器执行 temporal join，选择最近的早期影像作为滞后波段，再比较当前和滞后 EVI。
+Use a temporal join with `maxDifference` and temporal ordering filters, select the nearest earlier image as the lag band, then compare current and lagged EVI.
 
 ## Constraints
 
-- 必须先应用质量掩膜和比例因子。
-- 没有匹配影像时不得直接调用 `first().rename()`。
-- 比值在滞后值接近零时不稳定，差值或稳健阈值可能更合适。
+- Apply quality masks and scale factors first.
+- Do not call `first().rename()` when there is no matching image.
+- Ratios are unstable when lagged values approach zero; differences or robust thresholds may be more appropriate.
 
 ## Example
 
 ### Scenario
 
-EVI 时间滞后 Join
+Temporal Join for EVI Lags
 
-Source: `raw_GEE_case/GEE训练教程_EVI植物生长季节表型分类.md`
+Source: raw_GEE_case EVI phenological-stage classification tutorial
 
 ### Implementation
 
@@ -54,4 +54,4 @@ Status: `required` operation; knowledge status follows frontmatter and requires 
 
 ### Limitations
 
-使用前应完成质量掩膜和比例因子处理；必须过滤没有 `previous` 匹配的影像。
+Apply quality masks and scale factors first; filter out images without a `previous` match.

@@ -1,33 +1,33 @@
 ---
 id: TASK-SOIL-SALINITY-VISUALIZATION-001
 kind: task
-title: 土壤盐分陆地区域制图
+title: Regional Soil-Salinity Mapping with Water Masking
 version: 0.2.0
 status: experimental
-summary: 依据原案例加载 AOI、盐分和 MOD44W，构建陆地盐分图层并按需生成专题表达。
+summary: Load the AOI, salinity data, and MOD44W from the source workflow, create a land-only salinity layer, and optionally produce a thematic visualization.
 tags: [gee, soil-salinity, water-mask]
 references: [SUBTASK-AOI-DEFINE-001, SUBTASK-SALINITY-LAND-MASK-001, SUBTASK-THEMATIC-LEGEND-001, SUBTASK-MAP-PRESENTATION-001]
-source: raw_GEE_case/GEE教程_MOD44W印度土壤盐分可视化.md
+source: raw_GEE_case MOD44W India soil-salinity visualization tutorial
 ---
 
 # Goal
-生成排除水体后的区域土壤盐分栅格。
+Generate a regional soil-salinity raster with water areas excluded.
 ## Applicability and boundaries
-适用于可访问的盐分资产和已知编码的水体产品；私有资产不可假定可用。
+Applies when salinity assets are accessible and the water product encoding is known. Do not assume private assets are available.
 ## Inputs
-AOI、盐分资产、水体产品与时间、盐分单位；可选分级配置。
+AOI, salinity asset, water product and period, salinity units, and optional classification settings.
 ## Outputs
-陆地盐分图层；可选地图样式和图例。
+Land-only salinity layer, with optional map styling and legend.
 ## Required workflow
-1. 加载并确认 AOI：[`SUBTASK-AOI-DEFINE-001`](../subtasks/SUBTASK-AOI-DEFINE-001.md)。
-2. 加载盐分数据、MOD44W 并构建陆地掩膜：[`SUBTASK-SALINITY-LAND-MASK-001`](../subtasks/SUBTASK-SALINITY-LAND-MASK-001.md)。
-3. 掩膜、汇总并裁剪盐分：[`SUBTASK-SALINITY-LAND-MASK-001`](../subtasks/SUBTASK-SALINITY-LAND-MASK-001.md)。
+1. Load and verify the AOI: [`SUBTASK-AOI-DEFINE-001`](../subtasks/SUBTASK-AOI-DEFINE-001.md).
+2. Load salinity data and MOD44W, then construct a land mask: [`SUBTASK-SALINITY-LAND-MASK-001`](../subtasks/SUBTASK-SALINITY-LAND-MASK-001.md).
+3. Apply the mask, summarize, and clip salinity: [`SUBTASK-SALINITY-LAND-MASK-001`](../subtasks/SUBTASK-SALINITY-LAND-MASK-001.md).
 ## Optional workflow
-1. 建立盐分等级和图例：[`SUBTASK-THEMATIC-LEGEND-001`](../subtasks/SUBTASK-THEMATIC-LEGEND-001.md)。
-2. 添加地图图层：[`SUBTASK-MAP-PRESENTATION-001`](../subtasks/SUBTASK-MAP-PRESENTATION-001.md)。
+1. Define salinity classes and a legend: [`SUBTASK-THEMATIC-LEGEND-001`](../subtasks/SUBTASK-THEMATIC-LEGEND-001.md).
+2. Add map layers: [`SUBTASK-MAP-PRESENTATION-001`](../subtasks/SUBTASK-MAP-PRESENTATION-001.md).
 ## Data dependencies
-盐分资产、MOD44W、AOI。
+Salinity asset, MOD44W, and AOI.
 ## Acceptance criteria
-资产可访问，水体编码正确，陆地掩膜有效，盐分单位明确。
+Assets are accessible, water encoding is correct, the land mask is valid, and salinity units are explicit.
 ## User confirmations
-提供/确认私有资产权限、等级定义和展示需求。
+Provide or confirm private-asset access, class definitions, and visualization requirements.
